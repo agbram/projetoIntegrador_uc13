@@ -8,92 +8,94 @@ datasource db {
 }
 
 model Customer {
-  id          Int       @id @default(autoincrement())
-  name        String
-  cnpj        String    @unique
-  contact     String?
-  email       String?
-  address     String?
-  note        String?
-  modality    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  cnpj      String   @unique
+  contact   String?
+  email     String?
+  address   String?
+  note      String?
+  modality  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  orders      Order[]
+  orders Order[]
 
   @@map("customers")
 }
 
+//jean
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  products    Product[]
+  products Product[]
 
   @@map("categories")
 }
 
 model Product {
-  id              Int          @id @default(autoincrement())
-  name            String
-  description     String?
-  categoryId      Int
-  category        Category    @relation(fields: [categoryId], references: [id])
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
 
-  costPrice       Float        @default(0)
-  markupPercent   Float        @default(0)
-  salePrice       Float        @default(0)
-  stockQuantity   Int          @default(0)
-  isActive        Boolean      @default(true)
+  costPrice     Float   @default(0)
+  markupPercent Float   @default(0)
+  salePrice     Float   @default(0)
+  stockQuantity Int     @default(0)
+  isActive      Boolean @default(true)
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  orderItems      OrderItem[]
-  purchaseItems   PurchaseItem[]
+  orderItems    OrderItem[]
+  purchaseItems PurchaseItem[]
 
   @@map("products")
 }
 
+//jean
 model Order {
-  id            Int          @id @default(autoincrement())
-  customerId    Int
-  customer      Customer     @relation(fields: [customerId], references: [id])
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id])
 
-  userId        Int?
-  user          User?        @relation(fields: [userId], references: [id])
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
 
-  orderDate     DateTime     @default(now())
-  deliveryDate  DateTime?
-  status        String       @default("PENDING")
-  notes         String?
-  total         Float?
+  orderDate    DateTime  @default(now())
+  deliveryDate DateTime?
+  status       String    @default("PENDING")
+  notes        String?
+  total        Float?
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items         OrderItem[]
+  items OrderItem[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id            Int      @id @default(autoincrement())
-  orderId       Int
-  order         Order    @relation(fields: [orderId], references: [id])
+  id      Int   @id @default(autoincrement())
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id])
 
-  productId     Int
-  product       Product  @relation(fields: [productId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
 
-  quantity      Int      @default(1)
-  unitPrice     Float
-  subtotal      Float
+  quantity  Int   @default(1)
+  unitPrice Float
+  subtotal  Float
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("order_items")
 }
@@ -107,59 +109,59 @@ model FixedExpense {
   category    String?
   note        String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("fixed_expenses")
 }
 
 model SupplyPurchase {
-  id            Int          @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   supplier      String?
-  purchaseDate  DateTime     @default(now())
+  purchaseDate  DateTime @default(now())
   paymentMethod String?
   total         Float?
   note          String?
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items         PurchaseItem[]
+  items PurchaseItem[]
 
   @@map("supply_purchases")
 }
 
 model PurchaseItem {
-  id            Int          @id @default(autoincrement())
-  purchaseId    Int
-  purchase      SupplyPurchase @relation(fields: [purchaseId], references: [id])
+  id         Int            @id @default(autoincrement())
+  purchaseId Int
+  purchase   SupplyPurchase @relation(fields: [purchaseId], references: [id])
 
-  productId     Int?
-  product       Product?     @relation(fields: [productId], references: [id])
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
 
-  description   String
-  quantity      Int          @default(1)
-  unitPrice     Float
-  subtotal      Float?
+  description String
+  quantity    Int    @default(1)
+  unitPrice   Float
+  subtotal    Float?
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("purchase_items")
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  name        String?
-  email       String   @unique
-  password    String
-  phone       String?
-  permission  Boolean  @default(true)
+  id         Int     @id @default(autoincrement())
+  name       String?
+  email      String  @unique
+  password   String
+  phone      String?
+  permission Boolean @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  orders      Order[]
+  orders Order[]
 
   @@map("users")
 }

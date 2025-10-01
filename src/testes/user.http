@@ -1,4 +1,4 @@
-@token = 
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTkzNTQ4ODAsImV4cCI6MTc1OTM4MzY4MH0.QFTIVJCNnIds8o8R6-BXWaCvOnIE7GFxnVTiO_wZSss
 
 ###
 POST http://localhost:3000/users HTTP/1.1
@@ -7,7 +7,7 @@ content-type: application/json
 {
   "name": "adm",
   "email": "adm@gmail.com",
-  "password": "102030",
+  "password": "Adm@123",
   "phone": "16992455837",
   "permission": true
 }
@@ -23,8 +23,8 @@ POST http://localhost:3000/users/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "teste10@gmail.com",
-  "senha": "teste10"
+  "email": "adm@gmail.com",
+  "senha": "Adm@123"
 }
 
 ###

@@ -3,12 +3,15 @@ import express from "express";
 import cors from "cors";
 
 import userRoutes from "./routes/user.js";
+import orderRoutes from "./routes/order.js";
+import { verificaToken } from "./middlewares/auth.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use("/users", userRoutes);
+app.use("/orders", verificaToken, orderRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

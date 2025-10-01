@@ -130,12 +130,9 @@ export const UserController = {
     try {
       let body = {};
 
-      if (req.body.pass) body.pass = req.body.pass;
+      if (req.body.password) body.pass = req.body.password;
       if (req.body.email) body.email = req.body.email;
       if (req.body.name) body.name = req.body.name;
-      if (req.body.birth) body.birth = req.body.birth;
-      if (req.body.creditCard) body.creditCard = req.body.creditCard;
-      if (req.body.address) body.address = req.body.address;
       if (req.body.phone) body.phone = req.body.phone;
       if (req.body.permission) body.permission = req.body.permission;
 

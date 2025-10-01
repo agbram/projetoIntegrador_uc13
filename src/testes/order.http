@@ -1,0 +1,14 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTkzNTQ4ODAsImV4cCI6MTc1OTM4MzY4MH0.QFTIVJCNnIds8o8R6-BXWaCvOnIE7GFxnVTiO_wZSss
+
+###
+POST http://localhost:3000/orders HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "orderDate": "10-01-2025",
+  "deliveryDate": "10-06-2025",
+  "status": "Pending",
+  "notes": "5 bolos de laranja",
+  "total": 100,
+}
