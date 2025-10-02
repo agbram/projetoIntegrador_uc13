@@ -24,26 +24,17 @@ model Customer {
   @@map("customers")
 }
 
-//jean
-model Category {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  products Product[]
-
-  @@map("categories")
+enum Category {
+  BOLOS
+  DOCINHOS
 }
 
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
-
+  
+  category      Category 
   costPrice     Float   @default(0)
   markupPercent Float   @default(0)
   salePrice     Float   @default(0)

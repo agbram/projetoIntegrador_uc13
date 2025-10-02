@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTkzNTkyMjMsImV4cCI6MTc1OTM4ODAyM30.UmsLMyIu8Unowdp4nyrM4YeShxXew-dPvAaFj_8uGNk
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0MzM1MjksImV4cCI6MTc1OTQ2MjMyOX0.Q2TdGnHwEfSzr54KmwRKxRItEnai6PvJV78fboVMu7A
 
 ###
 POST http://localhost:3000/products HTTP/1.1
@@ -8,7 +8,7 @@ Authorization: Bearer {{token}}
 {
   "name": "Bolo de laranja",
   "description": "Bolo feito com cenouras frescas",
-  "categoryId": ,
+  "category": "BOLOS",
   "costPrice": 8.90,
   "markupPercent": 100,
   "salePrice": 17.8,

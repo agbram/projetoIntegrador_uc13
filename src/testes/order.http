@@ -1,14 +1,50 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTkzNTQ4ODAsImV4cCI6MTc1OTM4MzY4MH0.QFTIVJCNnIds8o8R6-BXWaCvOnIE7GFxnVTiO_wZSss
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0Mjk1NTMsImV4cCI6MTc1OTQ1ODM1M30.HaHu8KzjQtDCwBKR5TTwGF8z9OMTrfY1AN6FX1jmWJs
 
 ###
 POST http://localhost:3000/orders HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
+{ 
+  "customerId": 1,
+  "orderDate": "2025-10-02",
+  "deliveryDate": "2025-10-05",
+  "status": "PENDING",
+  "notes": "Entrega rápida"
+}
+
+###
+PUT http://localhost:3000/orders/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{ 
+  "customerId": 1,
+  "orderDate": "2025-10-02",
+  "deliveryDate": "2025-10-06",
+  "status": "PENDING",
+  "notes": "Entrega rápida"
+}
+
+
+###
+GET http://localhost:3000/orders HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+GET http://localhost:3000/orders HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+POST http://localhost:3000/orders/1/items
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
 {
-  "orderDate": "10-01-2025",
-  "deliveryDate": "10-06-2025",
-  "status": "Pending",
-  "notes": "5 bolos de laranja",
-  "total": 100,
+  "productId": 1,
+  "quantity": 3,
+  "unitPrice": 10.50
 }
