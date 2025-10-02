@@ -1,0 +1,17 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTkzNTkyMjMsImV4cCI6MTc1OTM4ODAyM30.UmsLMyIu8Unowdp4nyrM4YeShxXew-dPvAaFj_8uGNk
+
+###
+POST http://localhost:3000/products HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Bolo de laranja",
+  "description": "Bolo feito com cenouras frescas",
+  "categoryId": ,
+  "costPrice": 8.90,
+  "markupPercent": 100,
+  "salePrice": 17.8,
+  "stockQuantity": 10,
+  "isActive": true
+}
