@@ -1,0 +1,12 @@
+### Criar um novo usuário
+POST http://localhost:3000/customers HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Nome teste",
+    "cnpj": "12345678000195",
+    "contact": "16992455837",
+    "email": "Customerteste@gmail.com",
+    "address": "Rua teste, 123",
+    "modality": "Atacado"
+}

@@ -1,5 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0Mjk1NTMsImV4cCI6MTc1OTQ1ODM1M30.HaHu8KzjQtDCwBKR5TTwGF8z9OMTrfY1AN6FX1jmWJs
-
+@token = 
 ###
 POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
