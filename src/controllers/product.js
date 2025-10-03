@@ -4,9 +4,9 @@ export const ProductController = {
     
     async store(req, res, next){
         try {
-            const {name, description, categoryId, costPrice, markupPercent, salePrice, stockQuantity, isActive} = req.body;
+            const {name, description, category, costPrice, markupPercent, salePrice, stockQuantity, isActive} = req.body;
             
-            if(!name || !categoryId){
+            if(!name || !category){
                 return res.status(400).json({error: "Nome e categoria são obrigatórios"});
             }
 
@@ -14,7 +14,7 @@ export const ProductController = {
         data: {
           name,
           description,
-          categoryId,
+          category,
           costPrice,
           markupPercent,
           salePrice,

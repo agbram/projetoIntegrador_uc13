@@ -9,4 +9,6 @@ router.get('/', OrderController.index);
 router.get('/:id', OrderController.show);
 router.put('/:id', verificaToken, OrderController.update);
 
+router.post("/:orderId/items", OrderController.addItem);
+
 export default router;
