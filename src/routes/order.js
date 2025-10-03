@@ -10,5 +10,6 @@ router.get('/:id', OrderController.show);
 router.put('/:id', verificaToken, OrderController.update);
 
 router.post("/:orderId/items", OrderController.addItem);
+router.delete("/:orderId/items/:itemId", OrderController.delItem);
 
 export default router;

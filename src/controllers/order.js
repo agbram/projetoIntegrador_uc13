@@ -121,55 +121,99 @@ export const OrderController = {
   },
 
   
-  async addItem(req, res, next) {
-    try {
-      const { orderId } = req.params;
-      const { productId, quantity, unitPrice } = req.body;
+ async addItem(req, res, next) {
+  try {
+    const { orderId } = req.params;
+    const { productId, quantity } = req.body; 
 
-      const item = await prisma.orderItem.create({
-        data: {
-          orderId: Number(orderId),
-          productId,
-          quantity,
-          unitPrice,
-          subtotal: quantity * unitPrice,
-        },
-      });
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
 
-      const items = await prisma.orderItem.findMany({
-        where: { orderId: Number(orderId) },
-      });
-
-      const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
-
-      await prisma.order.update({
-        where: { id: Number(orderId) },
-        data: { total: newTotal },
-      });
-
-      res.status(201).json({ item, newTotal });
-    } catch (error) {
-      console.error("Erro ao adicionar item!", error);
-      next(error);
+    if (!product) {
+      return res.status(404).json({ error: "Produto não encontrado" });
     }
-  },
 
-  async delItem(req, res, next){
-    try {
-      const {orderId} = req.params;
-      const {productId} = req.body;
+    const unitPrice = product.costPrice;
+    const subtotal = quantity * unitPrice;
 
-      const item = await prisma.orderItem.delete({
-        where: {productId}
-      });
+    const item = await prisma.orderItem.create({
+      data: {
+        orderId: Number(orderId),
+        productId,
+        quantity,
+        unitPrice,
+        subtotal,
+      },
+    });
 
-      res.status(200).json(item)
+    const items = await prisma.orderItem.findMany({
+      where: { orderId: Number(orderId) },
+    });
 
+    const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
 
-    } catch (error) {
-      console.error("Erro ao excluir item!", error);
-      next(error);
-    }
+    await prisma.order.update({
+      where: { id: Number(orderId) },
+      data: { total: newTotal },
+    });
+
+    res.status(201).json({ item, newTotal });
+  } catch (error) {
+    console.error("Erro ao adicionar item!", error);
+    next(error);
   }
+},
+
+
+async delItem(req, res, next) {
+  try {
+    const { orderId, itemId } = req.params; 
+    
+    const item = await prisma.orderItem.delete({
+      where: { id: Number(itemId) },
+    });
+
+    
+    const items = await prisma.orderItem.findMany({ where: { orderId: Number(orderId) } });
+    const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+    await prisma.order.update({
+      where: { id: Number(orderId) },
+      data: { total: newTotal },
+    });
+
+    res.status(200).json({ deletedItem: item, newTotal });
+  } catch (error) {
+    console.error("Erro ao excluir item!", error);
+    next(error);
+  }
+},
+
+async updateItem(req, res, next){
+  try {
+    const { orderId, itemId } = req.params;
+    const { productId, quantity } = req.body; 
+    
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
+    const u = await prisma.orderItem.update({
+      data: {
+        
+      }
+    })
+
+
+  } catch (error) {
+    
+  }
+}
+
 
 };

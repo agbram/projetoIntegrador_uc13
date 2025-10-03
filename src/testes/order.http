@@ -28,13 +28,7 @@ Authorization: Bearer {{token}}
 
 
 ###
-GET http://localhost:3000/orders HTTP/1.1
-content-type: application/json
-Authorization: Bearer {{token}}
-
-###
-
-GET http://localhost:3000/orders HTTP/1.1
+GET http://localhost:3000/orders/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -44,7 +38,10 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "productId": 1,
-  "quantity": 3,
-  "unitPrice": 10.50
+  "productId": 3,
+  "quantity": 4
 }
+###
+DELETE http://localhost:3000/orders/1/items/2
+Content-Type: application/json
+Authorization: Bearer {{token}}

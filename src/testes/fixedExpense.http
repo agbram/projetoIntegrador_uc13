@@ -1,7 +1,6 @@
 
-
 ###
-POST http://localhost:3000/fixedexpense HTTP/1.1
+POST http://localhost:3000/fixedExpense HTTP/1.1
 content-type: application/json
 {
     "description":"description",
@@ -13,11 +12,11 @@ content-type: application/json
 }
 
 ###
-GET http://localhost:3000/fixedexpense HTTP/1.1
+GET http://localhost:3000/fixedExpense HTTP/1.1
 content-type: application/json
 
 ###
-GET http://localhost:3000/fixedexpense?date=19072004 & category=bolo HTTP/1.1
+GET http://localhost:3000/fixedExpense?date=19072004 & category=bolo HTTP/1.1
 content-type: application/json
 
 ###

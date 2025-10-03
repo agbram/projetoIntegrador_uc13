@@ -6,12 +6,33 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Bolo de laranja",
-  "description": "Bolo feito com cenouras frescas",
+  "name": "Bolo de chocolate",
+  "description": "Bolo de chocolate nobre",
   "category": "BOLOS",
-  "costPrice": 8.90,
+  "costPrice": 10.90,
   "markupPercent": 100,
-  "salePrice": 17.8,
+  "salePrice": 21.8,
+  "stockQuantity": 10,
+  "isActive": true
+}
+
+###
+GET http://localhost:3000/products HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT http://localhost:3000/products/2 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Bolo de fuba",
+  "description": "Bolo de fuba quentinho",
+  "category": "BOLOS",
+  "costPrice": 7.90,
+  "markupPercent": 100,
+  "salePrice": 15.8,
   "stockQuantity": 10,
   "isActive": true
 }
