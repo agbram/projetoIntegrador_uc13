@@ -65,7 +65,7 @@ export const FixedExpenseController = {
         next(err);}
     },
 
-    async delete(req, res, next){
+    async del(req, res, next){
         try{
             const id = Number(req.params.id);
             
