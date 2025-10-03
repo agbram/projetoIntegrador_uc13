@@ -20,13 +20,13 @@ GET http://localhost:3000/fixedExpense?date=19072004 & category=bolo HTTP/1.1
 content-type: application/json
 
 ###
-GET http://localhost:3000/fixedexpense/1 HTTP/1.1
+GET http://localhost:3000/fixedExpense/1 HTTP/1.1
 content-type: application/json
 
 ###
-PUT http://localhost:3000/fixedexpense HTTP/1.1
+PUT http://localhost:3000/fixedExpense HTTP/1.1
 content-type: application/json
 
 ###
-DELETE  http://localhost:3000/fixedexpense HTTP/1.1
+DELETE  http://localhost:3000/fixedExpense HTTP/1.1
 content-type: application/json

@@ -8,6 +8,6 @@ router.post("/", FixedExpenseController.store);
 router.get("/", FixedExpenseController.index);
 router.get("/:id",FixedExpenseController.show);
 router.put("/:id",FixedExpenseController.put);
-router.delete("/:id",FixedExpenseController.delete);
+router.delete("/:id",FixedExpenseController.del);
 
 export default router;
