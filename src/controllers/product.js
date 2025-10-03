@@ -96,16 +96,21 @@ export const ProductController = {
 
   async update(req, res, next) {
     try {
+
       let body = {};
 
       if (req.body.name) body.name = req.body.name;
       if (req.body.description) body.description = req.body.description;
-      if (req.body.categoryId) body.categoryId = req.body.categoryId;
+      if (req.body.category) body.category = req.body.category;
       if (req.body.costPrice) body.costPrice = req.body.costPrice;
       if (req.body.markupPercent) body.markupPercent = req.body.markupPercent;
-      if (req.body.salePrice) body.salePrice = req.body.salePrice;
       if (req.body.stockQuantity) body.stockQuantity = req.body.stockQuantity;
       if (req.body.isActive) body.isActive = req.body.isActive;
+
+      const costPrice = body.costPrice !== undefined ? body.costPrice : currentProduct.costPrice;
+      const markupPercent = body.markupPercent !== undefined ? body.markupPercent : currentProduct.markupPercent;
+
+      body.salePrice = costPrice * (1 + markupPercent / 100);
 
       const id = Number(req.params.id);
 

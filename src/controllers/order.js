@@ -155,7 +155,7 @@ export const OrderController = {
 
     await prisma.order.update({
       where: { id: Number(orderId) },
-      data: { total: newTotal },
+      data: { total: parseFloat(newTotal.toFixed(2)) },
     });
 
     res.status(201).json({ item, newTotal });

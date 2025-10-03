@@ -29,9 +29,8 @@ Authorization: Bearer {{token}}
   "name": "Dolce di Pistacchio",
   "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
   "category": "BOLOS",
-  "costPrice": 7.90,
-  "markupPercent": 100,
-  "salePrice": 15.8,
+  "costPrice": 15,
+  "markupPercent": 130,
   "stockQuantity": 10,
   "isActive": true
 }

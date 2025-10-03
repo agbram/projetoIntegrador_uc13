@@ -1,20 +1,27 @@
-import prisma from "../prisma";
+import prisma from "../prisma.js";
 
-export const customerController = {
+export const CustomerController = {
 
     // Criar um novo cliente
     async store(req, res, next) {
         try {
 
-            const { name, cnpj, contact, email, address, modality } = req.body;
+            const { name, cnpj, contact, email, address, note, modality } = req.body;
 
-            // Verifica se o cliente já existe
-            const customerExists = await prisma.customer.findUnique({
-                where: { id: parseInt(customerId) },
-            });
-            if (customerExists) {
-                return res.status(400).json({ error: "Cliente já existe" });
-            }
+                  const existingCustomer = await prisma.customer.findFirst({
+        where: {
+          OR: [
+            { cnpj: cnpj },
+            { email: email }
+          ]
+        }
+      });
+
+      if (existingCustomer) {
+        return res.status(400).json({
+          error: "Cliente já cadastrado com este CNPJ ou e-mail."
+        });
+      }
 
             const newCustomer = await prisma.customer.create({
                 data: {
@@ -23,8 +30,10 @@ export const customerController = {
                     contact,
                     email,
                     address,
+                    note,
                     modality
                 },
+
             });
             res.status(201).json(newCustomer);
         } catch (err) {
@@ -64,6 +73,7 @@ export const customerController = {
             if (req.body.contact) {query.contact = req.body.contact;}
             if (req.body.email) {query.email = req.body.email;}
             if (req.body.address) {query.address = req.body.address;}
+            if (req.body.note) {query.note = req.body.note;}
             if (req.body.modality) {query.modality = req.body.modality;}
 
             const c = await prisma.customer.update({

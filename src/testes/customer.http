@@ -1,5 +1,21 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk1MTI3NzAsImV4cCI6MTc1OTU0MTU3MH0.25mQra6HHJKbQQCfctQHNFQjTGtKwXy3Vw60NSQUFS8
+
 ### Criar um novo usuário
 POST http://localhost:3000/customers HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "teste1",
+    "cnpj": "12345678000198",
+    "contact": "16992455837",
+    "email": "Customertest@gmail.com",
+    "address": "Rua teste, 123",
+    "modality": "Atacado"
+}
+
+###
+PUT http://localhost:3000/customers/2 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -8,5 +24,6 @@ Content-Type: application/json
     "contact": "16992455837",
     "email": "Customerteste@gmail.com",
     "address": "Rua teste, 123",
+    "note": "Cliente geralmente pede as terças",
     "modality": "Atacado"
 }
