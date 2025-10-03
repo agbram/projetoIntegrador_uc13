@@ -1,4 +1,3 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0MjgzNzEsImV4cCI6MTc1OTQ1NzE3MX0.NqIGdpseznAdNgjDfLEOcjQFSxsFPTy1FkwBy83_j7A
 
 ###
 POST http://localhost:3000/users HTTP/1.1
