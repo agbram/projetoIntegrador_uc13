@@ -55,7 +55,6 @@ model Product {
   @@map("products")
 }
 
-//jean
 model Order {
   id         Int      @id @default(autoincrement())
   customerId Int

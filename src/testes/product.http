@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk1MTI3NzAsImV4cCI6MTc1OTU0MTU3MH0.25mQra6HHJKbQQCfctQHNFQjTGtKwXy3Vw60NSQUFS8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 
 ###
 POST http://localhost:3000/products HTTP/1.1
@@ -6,8 +6,8 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Bolo de pistache",
-  "description": "Bolo de chocolate nobre",
+  "name": "Dolce di Pistacchio",
+  "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
   "category": "BOLOS",
   "costPrice": 15.90,
   "markupPercent": 120,
@@ -21,7 +21,7 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 ###
-PUT http://localhost:3000/products/4 HTTP/1.1
+PUT http://localhost:3000/products/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -29,8 +29,17 @@ Authorization: Bearer {{token}}
   "name": "Dolce di Pistacchio",
   "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
   "category": "BOLOS",
-  "costPrice": 15,
+  "costPrice": 17,
   "markupPercent": 130,
   "stockQuantity": 10,
   "isActive": true
+}
+
+###
+PUT http://localhost:3000/products/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "stockQuantity": 10
 }

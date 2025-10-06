@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk1MTI3NzAsImV4cCI6MTc1OTU0MTU3MH0.25mQra6HHJKbQQCfctQHNFQjTGtKwXy3Vw60NSQUFS8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 ###
 POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
@@ -36,7 +36,7 @@ Authorization: Bearer {{token}}
   "email": "teste8@gmail.com",
   "password": "teste8",
   "phone": "16992455837",
-  "permission": true
+  "permission": false
 }
 
 ###

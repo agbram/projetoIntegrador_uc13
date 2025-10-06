@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk1MTI3NzAsImV4cCI6MTc1OTU0MTU3MH0.25mQra6HHJKbQQCfctQHNFQjTGtKwXy3Vw60NSQUFS8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 
 ### Criar um novo usuário
 POST http://localhost:3000/customers HTTP/1.1
@@ -14,9 +14,15 @@ Authorization: Bearer {{token}}
     "modality": "Atacado"
 }
 
-###
-PUT http://localhost:3000/customers/2 HTTP/1.1
+### Criar um novo usuário
+GET http://localhost:3000/customers HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT http://localhost:3000/customers/1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
     "name": "Nome teste",

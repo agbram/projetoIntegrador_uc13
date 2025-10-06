@@ -125,4 +125,5 @@ export const ProductController = {
       next(error);
     }
   },
+
 };
