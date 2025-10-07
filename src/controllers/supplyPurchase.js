@@ -4,10 +4,12 @@ export const SupplyPurchaseController = {
   //   Criar uma nova compra de suprimentos
   async store(req, res, next) {
     try {
+      const { supplier, paymentMethod, total, note } = req.body;
+
       const supplyPurchase = await prisma.supplyPurchase.create({
         data: {
           supplier,
-          PaymentMethod,
+          paymentMethod,
           total,
           note,
         },
@@ -23,6 +25,7 @@ export const SupplyPurchaseController = {
     try {
       const { supplier } = req.query;
       let supplyPurchases;
+
       if (supplier) {
         supplyPurchases = await prisma.supplyPurchase.findMany({
           where: { supplier: { contains: supplier } },
@@ -30,6 +33,7 @@ export const SupplyPurchaseController = {
       } else {
         supplyPurchases = await prisma.supplyPurchase.findMany();
       }
+
       res.status(200).json(supplyPurchases);
     } catch (err) {
       next(err);
@@ -60,6 +64,19 @@ export const SupplyPurchaseController = {
         data: query,
       });
       res.status(200).json(sp);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  //   Deletar uma compra de suprimentos
+  async delete(req, res, next) {
+    try {
+      const id = Number(req.params.id);
+      let sd = await prisma.supplyPurchase.delete({
+        where: { id },
+      });
+      res.status(204).json();
     } catch (err) {
       next(err);
     }
