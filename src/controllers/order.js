@@ -42,9 +42,7 @@ export const OrderController = {
           where: {
             OR: [
               orderDate ? { orderDate: { equals: new Date(orderDate) } } : {},
-              deliveryDate
-                ? { deliveryDate: { equals: new Date(deliveryDate) } }
-                : {},
+              deliveryDate ? { deliveryDate: { equals: new Date(deliveryDate) } } : {},
               status ? { status: { contains: status } } : {},
             ],
           },
