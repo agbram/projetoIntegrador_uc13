@@ -11,3 +11,5 @@ npm i dorenv
 npm i @prisma/client
 npm i i prisma --save-dev
 npx prisma generate
+
+meu fesh não esta indo
