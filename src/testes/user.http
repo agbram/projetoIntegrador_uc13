@@ -1,5 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0Mjk1NTMsImV4cCI6MTc1OTQ1ODM1M30.HaHu8KzjQtDCwBKR5TTwGF8z9OMTrfY1AN6FX1jmWJs
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 ###
 POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
@@ -37,5 +36,10 @@ Authorization: Bearer {{token}}
   "email": "teste8@gmail.com",
   "password": "teste8",
   "phone": "16992455837",
-  "permission": true
+  "permission": false
 }
+
+###
+DELETE http://localhost:3000/users/1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
