@@ -1,0 +1,14 @@
+### Cria / Registra uma compra de suprimentos
+POST http://localhost:3000/supplyPurchase
+Content-Type: application/json
+
+{
+    "supplier": "Fornecedor Exemplo",
+    "PaymentMethod": "Cartão de Crédito",
+    "total": 1500.00,
+    "note,": "Compra mensal de suprimentos",
+}
+
+### Lista todas as compras de suprimentos
+GET http://localhost:3000/supplyPurchase
+Content-Type: application/json
