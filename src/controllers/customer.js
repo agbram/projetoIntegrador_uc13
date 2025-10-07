@@ -77,7 +77,7 @@ export const customerController = {
         }
     },
 
-    // Deletar um cliente
+    // Deletar um cliente por ID
     async delete(req, res, next) {
         try {
             const id = Number(req.params.id);
