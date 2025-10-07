@@ -1,4 +1,4 @@
-import { Router } from 'express';
+pimport { Router } from 'express';
 import { CustomerController } from '../controllers/customer.js';
 
 const router = Router();

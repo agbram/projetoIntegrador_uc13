@@ -36,12 +36,32 @@ export const SupplyPurchaseController = {
     }
   },
 
-// Atualizar uma compra de suprimentos existente 
-   async update (req, res, next) {
+  // Atualizar uma compra de suprimentos existente
+  async update(req, res, next) {
     try {
-        
-    } catch (error) {
-        
+      const id = Number(req.params.id);
+      let query = {};
+
+      if (req.body.supplier) {
+        query.supplier = req.body.supplier;
+      }
+      if (req.body.PaymentMethod) {
+        query.PaymentMethod = req.body.PaymentMethod;
+      }
+      if (req.body.total) {
+        query.total = req.body.total;
+      }
+      if (req.body.note) {
+        query.note = req.body.note;
+      }
+
+      const sp = await prisma.supplyPurchase.update({
+        where: { id },
+        data: query,
+      });
+      res.status(200).json(sp);
+    } catch (err) {
+      next(err);
     }
-   }
+  },
 };

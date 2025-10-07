@@ -12,3 +12,15 @@ Content-Type: application/json
 ### Lista todas as compras de suprimentos
 GET http://localhost:3000/supplyPurchase
 Content-Type: application/json
+
+
+### Atualiza uma compra de suprimentos pelo ID
+PUT http://localhost:3000/supplyPurchase/1
+Content-Type: application/json
+
+{
+    "supplier": "Fornecedor Atualizado",
+    "paymentMethod": "Boleto Bancário",
+    "total": 1750.00,
+    "note": "Compra atualizada de suprimentos"
+}
