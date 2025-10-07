@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 export const UserController = {
   async login(req, res, next) {
     try {
-      console.log(req.body)
+      console.log(req.body);
       const { email, senha } = req.body;
 
       let u = await prisma.user.findFirst({
@@ -33,25 +33,18 @@ export const UserController = {
         { expiresIn: "8h" }
       );
 
-      return res.json({token});
-
+      return res.json({ token });
     } catch (e) {
       next(e);
     }
   },
   async store(req, res, next) {
-       try {
-      const {
-        password,
-        email,
-        name,
-        phone,
-        permission,
-      } = req.body;
+    try {
+      const { password, email, name, phone, permission } = req.body;
 
       const hash = await bcrypt.hash(password, 10);
 
-        //guardando
+      //guardando
       const u = await prisma.user.create({
         data: {
           password: hash,
@@ -114,8 +107,11 @@ export const UserController = {
   async del(req, res, _next) {
     try {
       const id = Number(req.params.id);
-      console.log(id);
-
+      if (id === 1) {
+        return res
+          .status(403)
+          .json({ error: "Não é permitido deletar o usuário administrador." });
+      }
       const u = await prisma.user.delete({
         where: { id },
       });
@@ -138,6 +134,13 @@ export const UserController = {
 
       const id = Number(req.params.id);
 
+      if (id === 1) {
+        if (req.body.permission === false || req.body.email) {
+          return res.status(403).json({
+            error:"Não é permitido desativar ou alterar o email do administrador.",
+          });
+        }
+      }
       const u = await prisma.user.update({
         where: { id },
         data: body,

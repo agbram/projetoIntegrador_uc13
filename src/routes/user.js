@@ -8,6 +8,7 @@ router.post('/',verificaToken, UserController.store);
 router.get('/', verificaToken, UserController.index);
 router.get('/:id', verificaToken, UserController.show);
 router.put('/:id', verificaToken, UserController.update);
+router.delete('/:id', verificaToken, UserController.del);
 router.post('/login', UserController.login);
 
 

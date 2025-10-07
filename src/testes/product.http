@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0MzM1MjksImV4cCI6MTc1OTQ2MjMyOX0.Q2TdGnHwEfSzr54KmwRKxRItEnai6PvJV78fboVMu7A
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 
 ###
 POST http://localhost:3000/products HTTP/1.1
@@ -6,12 +6,11 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Bolo de chocolate",
-  "description": "Bolo de chocolate nobre",
+  "name": "Dolce di Pistacchio",
+  "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
   "category": "BOLOS",
-  "costPrice": 10.90,
-  "markupPercent": 100,
-  "salePrice": 21.8,
+  "costPrice": 15.90,
+  "markupPercent": 120,
   "stockQuantity": 10,
   "isActive": true
 }
@@ -22,17 +21,25 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 ###
-PUT http://localhost:3000/products/2 HTTP/1.1
+PUT http://localhost:3000/products/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Bolo de fuba",
-  "description": "Bolo de fuba quentinho",
+  "name": "Dolce di Pistacchio",
+  "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
   "category": "BOLOS",
-  "costPrice": 7.90,
-  "markupPercent": 100,
-  "salePrice": 15.8,
+  "costPrice": 17,
+  "markupPercent": 130,
   "stockQuantity": 10,
   "isActive": true
+}
+
+###
+PUT http://localhost:3000/products/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "stockQuantity": 10
 }

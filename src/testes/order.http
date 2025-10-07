@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk0Mjk1NTMsImV4cCI6MTc1OTQ1ODM1M30.HaHu8KzjQtDCwBKR5TTwGF8z9OMTrfY1AN6FX1jmWJs
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 
 ###
 POST http://localhost:3000/orders HTTP/1.1
@@ -7,10 +7,10 @@ Authorization: Bearer {{token}}
 
 { 
   "customerId": 1,
-  "orderDate": "2025-10-02",
-  "deliveryDate": "2025-10-05",
+  "orderDate": "2025-10-04",
+  "deliveryDate": "2025-10-06",
   "status": "PENDING",
-  "notes": "Entrega rápida"
+  "notes": "Entrega para segunda-feira"
 }
 
 ###
@@ -28,7 +28,7 @@ Authorization: Bearer {{token}}
 
 
 ###
-GET http://localhost:3000/orders/1 HTTP/1.1
+GET http://localhost:3000/orders HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -38,10 +38,20 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "productId": 3,
-  "quantity": 4
+  "productId": 1,
+  "quantity": 2
 }
 ###
 DELETE http://localhost:3000/orders/1/items/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
+
+###
+PUT http://localhost:3000/orders/1/items/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "quantity": 8
+}
