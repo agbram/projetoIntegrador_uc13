@@ -4,15 +4,15 @@ export const SupplyController = {
     async store(req,res, next){
         try{
             const { name, description, unit, unitPrice, stockQty} = req.body
-
+            console.log(stockQty);
             const s = await prisma.supply.create({
-                data: { name,description,unit,unitPrice,stockQty }
+                data: { name, description, unit, unitPrice, stockQty }
             });
 
             res.status(201).json(s);
         }catch (err){
             console.error("Erro ao fornecer:", err);
-            res.status(500).json({ message: "Erro no fornecimento." });
+            res.status(500).json({ message: "Erro no item." });
         }
 
     },
@@ -37,7 +37,7 @@ export const SupplyController = {
             res.status(200).json(ss); 
         } catch (err) {
             console.error("fornecedor não encontrado", err);
-            res.status(404).json({ message: "fornecedor não encontrado." }); 
+            res.status(404).json({ message: "item não encontrado." }); 
         }
     },
 
@@ -62,9 +62,9 @@ export const SupplyController = {
         } catch (err) {
             console.error("Erro ao atualizar despesa:", err);
             if (err.code === "P2025") {  
-                res.status(404).json({ message: "fornecedor não encontrado para atualizar." });
+                res.status(404).json({ message: "item não encontrado para atualizar." });
             } else {
-                res.status(500).json({ message: "Erro ao atualizar fornecedor." });
+                res.status(500).json({ message: "Erro ao atualizar item." });
             }
         }
     },
@@ -77,13 +77,13 @@ export const SupplyController = {
                 where: { id }
             });
 
-            res.status(200).json({ message: "Fornecedor deletado com sucesso.", deleted: ss });
+            res.status(200).json({ message: "item deletado com sucesso.", deleted: ss });
         } catch (err) {
-            console.error("Erro ao deletar fornecedor:", err);
+            console.error("Erro ao deletar item:", err);
             if (err.code === "P2025") {
-                res.status(404).json({ message: "fornecedor não encontrado para deletar." });
+                res.status(404).json({ message: "item não encontrado para deletar." });
             } else {
-                res.status(500).json({ message: "Erro ao deletar fornecedor." });
+                res.status(500).json({ message: "Erro ao deletar item." });
             }
         }
     },
