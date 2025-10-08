@@ -215,5 +215,5 @@ model RuleGroup {
   rule Rule @relation(fields: [ruleId], references: [id])
   ruleId Int
 
-  @@unique([ruleId, groupId], name: "ruleId_groupId")
+  @@unique([ruleId, groupId], name: "groupId_ruleId")
 }

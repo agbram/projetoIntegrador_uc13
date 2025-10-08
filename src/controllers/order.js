@@ -256,4 +256,26 @@ async updateItem(req, res, next) {
       next(error);
     }
   },
-};
+
+async atualizaStatus(req, res, next) {
+    try {
+      const id = Number(req.params.id);
+      const { status } = req.body;
+
+      if (!["PENDENTE", "EM PRODUÇÃO", "CONCLUÍDO", "CANCELADO"].includes(status)) {
+        return res.status(400).json({ error: "Status inválido." });
+      }
+
+      const o = await prisma.order.update({
+        where: { id },
+        data: { status }
+      });
+
+      res.status(200).json(o);
+    } catch (error) {
+      console.error("Erro ao atualizar status do pedido!", error);
+      next(error);
+    }
+},
+}
+

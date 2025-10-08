@@ -19,6 +19,7 @@ export function verificaRule(requiredRole) {
       if (!vinculo)
         return res.status(403).json({ error: "Usuário não autorizado" });
       return next();
+      
     } catch (err) {
       console.error("Erro ao verificar regras de acesso!", err);
       return res.status(403).json({ error: "Usuário não autorizado" });
