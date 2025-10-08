@@ -8,7 +8,7 @@ import productRoutes from "./routes/product.js";
 import fixedExpenseRoutes from "./routes/fixedExpense.js";
 import customerRoutes from "./routes/customer.js";
 import { verificaToken } from "./middlewares/auth.js";
-import { SupplyRoutes } from "./controllers/supply.js";
+import  SupplyRoutes  from "./routes/supply.js";
 
 
 const app = express();
