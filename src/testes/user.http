@@ -1,14 +1,16 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NTI5MzksImV4cCI6MTc1OTk4MTczOX0.Z9yfEvRArs9mlBEBRkMTRJYQSyKMsSLW4SQ1vnAYQYA
 ###
 POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "name": "adm",
-  "email": "adm@gmail.com",
-  "password": "Adm@123",
+  "name": "Jucilene",
+  "email": "jucilene@gmail.com",
+  "password": "123",
   "phone": "16992455837",
-  "permission": true
+  "groups": [2]
+  
 }
 
 ###

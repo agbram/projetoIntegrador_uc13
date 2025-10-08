@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk4NTYyMDcsImV4cCI6MTc1OTg4NTAwN30.d3iK2A2hWhx_rzJ89WHKLu4dXuQpHQId2T_uuMbV-hU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NTI5MzksImV4cCI6MTc1OTk4MTczOX0.Z9yfEvRArs9mlBEBRkMTRJYQSyKMsSLW4SQ1vnAYQYA
 
 ###
 POST http://localhost:3000/orders HTTP/1.1
@@ -9,7 +9,7 @@ Authorization: Bearer {{token}}
   "customerId": 1,
   "orderDate": "2025-10-04",
   "deliveryDate": "2025-10-06",
-  "status": "PENDING",
+  "status": "PENDENTE",
   "notes": "Entrega para segunda-feira"
 }
 
@@ -22,7 +22,7 @@ Authorization: Bearer {{token}}
   "customerId": 1,
   "orderDate": "2025-10-02",
   "deliveryDate": "2025-10-06",
-  "status": "PENDING",
+  "status": "PENDENTE",
   "notes": "Entrega rápida"
 }
 
@@ -54,4 +54,13 @@ Authorization: Bearer {{token}}
 {
   "productId": 1,
   "quantity": 8
+}
+
+###
+PUT http://localhost:3000/orders/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "EM PRODUÇÃO"
 }

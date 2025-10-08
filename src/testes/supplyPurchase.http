@@ -24,3 +24,7 @@ Content-Type: application/json
     "total": 1750.00,
     "note": "Compra atualizada de suprimentos"
 }
+
+### Deleta uma compra de suprimentos pelo ID
+DELETE http://localhost:3000/supplyPurchase/1
+Content-Type: application/json

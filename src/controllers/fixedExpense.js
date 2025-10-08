@@ -72,8 +72,8 @@ export const FixedExpenseController = {
         }
     },
 
-    async del(req, res, next) {
-        try {
+    async del(req, res, next){
+        try{
             const id = Number(req.params.id);
 
             const fs = await prisma.fixedExpense.delete({

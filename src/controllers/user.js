@@ -38,31 +38,44 @@ export const UserController = {
       next(e);
     }
   },
+
   async store(req, res, next) {
     try {
-      const { password, email, name, phone, permission } = req.body;
-
+      const { password, email, name, phone } = req.body;
+  
       const hash = await bcrypt.hash(password, 10);
-
-      //guardando
+  
       const u = await prisma.user.create({
         data: {
           password: hash,
           email,
           name,
           phone,
-          permission: Boolean(permission),
+          group: {
+            create: [
+              { group: { connect: { name: 'Administrador' } } },
+              { group: { connect: { name: 'Confeiteiras' } } },
+            ],
+          },
+        },
+        include: {
+          group: {
+            include: {
+              group: true, // traz os dados dos grupos conectados
+            },
+          },
         },
       });
+      
+  
       console.log("User created:", u);
       res.status(201).json(u);
-      //mensagem de erro
     } catch (err) {
       console.error("Error details:", err);
       next(err);
     }
   },
-
+  
   async index(req, res, _next) {
     try {
       const { name, email, phone } = req.query;
@@ -130,14 +143,14 @@ export const UserController = {
       if (req.body.email) body.email = req.body.email;
       if (req.body.name) body.name = req.body.name;
       if (req.body.phone) body.phone = req.body.phone;
-      if (req.body.permission) body.permission = req.body.permission;
 
       const id = Number(req.params.id);
 
       if (id === 1) {
         if (req.body.permission === false || req.body.email) {
           return res.status(403).json({
-            error:"Não é permitido desativar ou alterar o email do administrador.",
+            error:
+              "Não é permitido desativar ou alterar o email do administrador.",
           });
         }
       }

@@ -11,3 +11,6 @@ npm i dorenv
 npm i @prisma/client
 npm i i prisma --save-dev
 npx prisma generate
+npx prisma migrate dev --name nome_da_atualizacao
+
+meu fesh não esta indo

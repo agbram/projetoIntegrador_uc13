@@ -1,0 +1,42 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NDcwNTcsImV4cCI6MTc1OTk3NTg1N30.Af_aCVzcRpvMc6I_tUxqe6tn8w8tDqgDrAJtaXOHPxM
+
+###
+POST http://localhost:3000/supply HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "description": "saco de farinha",
+  "name": "farinha do cladio",
+  "unit": "kg",
+  "unitPrice": 120.00,
+  "stockQty": 5
+}
+
+###
+GET http://localhost:3000/supply HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:3000/supply/2 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT http://localhost:3000/supply/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+ "description": "Aluguel",
+  "name": "Bolo de chocolate",
+  "unit": "cladio",
+  "unitPrice": 120.00,
+  "stockyQty": 5
+}
+
+###
+DELETE  http://localhost:3000/supply/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
