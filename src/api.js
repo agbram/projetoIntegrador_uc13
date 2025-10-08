@@ -9,6 +9,7 @@ import fixedExpenseRoutes from "./routes/fixedExpense.js";
 import customerRoutes from "./routes/customer.js";
 import { verificaToken } from "./middlewares/auth.js";
 import { verificaRule } from "./middlewares/rules.js";
+import  SupplyRoutes  from "./routes/supply.js";
 
 
 const app = express();
@@ -20,6 +21,9 @@ app.use("/orders", verificaToken, orderRoutes);
 app.use("/products", verificaToken, productRoutes);
 app.use("/fixedExpenses", verificaToken, verificaRule("ADM"), fixedExpenseRoutes);
 app.use("/customers", verificaToken, verificaRule("ADM"), customerRoutes);
+app.use("/fixedExpenses", verificaToken, fixedExpenseRoutes);
+app.use("/customers", verificaToken, customerRoutes);
+app.use("/supply", verificaToken, SupplyRoutes)
 
 
 
