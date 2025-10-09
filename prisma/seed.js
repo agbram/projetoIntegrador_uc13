@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
- 
   // Helpers idempotentes (usam únicos `name`)
 async function upsertRule({ name, description }) {
   return prisma.rule.upsert({

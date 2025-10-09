@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NTI5MzksImV4cCI6MTc1OTk4MTczOX0.Z9yfEvRArs9mlBEBRkMTRJYQSyKMsSLW4SQ1vnAYQYA
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NjMwMzIsImV4cCI6MTc1OTk5MTgzMn0.8u6PKBOlcKvCO4wsTzitKdrsxYI1G_n2qCXzh3myx78
 
 ### Criar um novo usuário
 POST http://localhost:3000/customers HTTP/1.1

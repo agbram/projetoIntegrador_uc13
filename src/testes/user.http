@@ -1,17 +1,18 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NTI5MzksImV4cCI6MTc1OTk4MTczOX0.Z9yfEvRArs9mlBEBRkMTRJYQSyKMsSLW4SQ1vnAYQYA
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjAwMzIyMTksImV4cCI6MTc2MDA2MTAxOX0.iOyTpGiC_MlPmrjCGh6GvRnzQk7qo9GOcTyH1r7laPc
+
 ###
 POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Jucilene",
-  "email": "jucilene@gmail.com",
-  "password": "123",
-  "phone": "16992455837",
-  "groups": [2]
-  
+  "name": "Wilson",
+  "email": "wilson@empresa.com",
+  "password": "wil@123",
+  "phone": "16999999999",
+  "groupIds": [2]
 }
+
 
 ###
 GET http://localhost:3000/users HTTP/1.1

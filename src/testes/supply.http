@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NDcwNTcsImV4cCI6MTc1OTk3NTg1N30.Af_aCVzcRpvMc6I_tUxqe6tn8w8tDqgDrAJtaXOHPxM
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjAwMzc0NzYsImV4cCI6MTc2MDA2NjI3Nn0.BAfz6nDLsGROoPpOJ1PcXF3LO_MOFxjn4Abd7IshBek
 
 ###
 POST http://localhost:3000/supply HTTP/1.1
@@ -7,9 +7,9 @@ Authorization: Bearer {{token}}
 
 {
   "description": "saco de farinha",
-  "name": "farinha do cladio",
+  "name": "farinha",
   "unit": "kg",
-  "unitPrice": 120.00,
+  "unitPrice": 10.00,
   "stockQty": 5
 }
 
@@ -40,3 +40,7 @@ Authorization: Bearer {{token}}
 DELETE  http://localhost:3000/supply/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
+
+###
+
+

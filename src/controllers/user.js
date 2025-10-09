@@ -39,42 +39,43 @@ export const UserController = {
     }
   },
 
-  async store(req, res, next) {
-    try {
-      const { password, email, name, phone } = req.body;
-  
-      const hash = await bcrypt.hash(password, 10);
-  
-      const u = await prisma.user.create({
-        data: {
-          password: hash,
-          email,
-          name,
-          phone,
-          group: {
-            create: [
-              { group: { connect: { name: 'Administrador' } } },
-              { group: { connect: { name: 'Confeiteiras' } } },
-            ],
-          },
-        },
-        include: {
-          group: {
-            include: {
-              group: true, // traz os dados dos grupos conectados
-            },
-          },
-        },
-      });
-      
-  
-      console.log("User created:", u);
-      res.status(201).json(u);
-    } catch (err) {
-      console.error("Error details:", err);
-      next(err);
+async store(req, res) {
+  try {
+    const { name, email, password, phone, groupIds } = req.body;
+
+    if (!name || !email || !password || !groupIds) {
+      return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
     }
-  },
+
+    // Criptografa a senha
+    const hash = await bcrypt.hash(password, 10);
+
+    // Cria usuário e conecta aos grupos
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hash,
+        phone,
+        group: {
+          create: groupIds.map(gid => ({
+            group: { connect: { id: gid } }
+          }))
+        }
+      },
+      include: {
+        group: {
+          include: { group: true } // mostra os detalhes do grupo
+        }
+      }
+    });
+
+    res.status(201).json(user);
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+    res.status(500).json({ error: "Erro interno ao criar usuário." });
+  }
+},
   
   async index(req, res, _next) {
     try {

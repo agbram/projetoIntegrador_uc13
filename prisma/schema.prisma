@@ -134,7 +134,7 @@ model PurchaseItem {
   supply     Supply          @relation(fields: [supplyId], references: [id])
 
   quantity   Float @default(1)     // insumos podem ser fracionados
-  unitPrice  Float
+  unitPrice  Float?
   subtotal   Float?
 
   createdAt DateTime @default(now())
@@ -177,7 +177,7 @@ model User {
   @@map("users")
 }
 
-model Rule{
+model Rule {
   id Int @id @default(autoincrement())
   name String @unique
   description String
@@ -185,7 +185,7 @@ model Rule{
   groups RuleGroup[]
 }
 
-model Group{
+model Group {
   id Int @id @default(autoincrement())
   name String @unique
   description String
@@ -194,7 +194,7 @@ model Group{
   users GroupUser[]
 }
 
-model GroupUser{
+model GroupUser {
   id Int @id @default(autoincrement())
 
   user User @relation(fields: [userId], references: [id])
@@ -215,5 +215,5 @@ model RuleGroup {
   rule Rule @relation(fields: [ruleId], references: [id])
   ruleId Int
 
-  @@unique([ruleId, groupId], name: "groupId_ruleId")
+  @@unique([groupId, ruleId], name: "groupId_ruleId")
 }
