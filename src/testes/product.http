@@ -1,7 +1,7 @@
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
 
 ###
-POST http://localhost:3000/products HTTP/1.1
+POST http://localhost:4000/products HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -16,12 +16,12 @@ Authorization: Bearer {{token}}
 }
 
 ###
-GET http://localhost:3000/products HTTP/1.1
+GET http://localhost:4000/products HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 ###
-PUT http://localhost:3000/products/1 HTTP/1.1
+PUT http://localhost:4000/products/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -36,7 +36,7 @@ Authorization: Bearer {{token}}
 }
 
 ###
-PUT http://localhost:3000/products/1 HTTP/1.1
+PUT http://localhost:4000/products/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 

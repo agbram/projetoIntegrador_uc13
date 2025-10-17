@@ -1,7 +1,7 @@
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjAwMzc0NzYsImV4cCI6MTc2MDA2NjI3Nn0.BAfz6nDLsGROoPpOJ1PcXF3LO_MOFxjn4Abd7IshBek
 
 ### Cria / Registra uma compra de suprimentos
-POST http://localhost:3000/supplyPurchases
+POST http://localhost:4000/supplyPurchases
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -12,18 +12,18 @@ Authorization: Bearer {{token}}
 }
 
 ### Lista todas as compras de suprimentos
-GET http://localhost:3000/supplyPurchases/
+GET http://localhost:4000/supplyPurchases/
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ### Lista todas as compras de suprimentos
-GET http://localhost:3000/supplyPurchases/2
+GET http://localhost:4000/supplyPurchases/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 
 ### Atualiza uma compra de suprimentos pelo ID
-PUT http://localhost:3000/supplyPurchases/1
+PUT http://localhost:4000/supplyPurchases/1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -36,12 +36,12 @@ Authorization: Bearer {{token}}
 }
 
 ### Deleta uma compra de suprimentos pelo ID
-DELETE http://localhost:3000/supplyPurchase/1
+DELETE http://localhost:4000/supplyPurchase/1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-POST http://localhost:3000/supplyPurchases/2/items HTTP/1.1
+POST http://localhost:4000/supplyPurchases/2/items HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -51,6 +51,6 @@ Authorization: Bearer {{token}}
 }
 
 ###
-GET http://localhost:3000/supplyPurchases/1/items HTTP/1.1
+GET http://localhost:4000/supplyPurchases/1/items HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}

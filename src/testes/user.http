@@ -1,36 +1,35 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjAwMzIyMTksImV4cCI6MTc2MDA2MTAxOX0.iOyTpGiC_MlPmrjCGh6GvRnzQk7qo9GOcTyH1r7laPc
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjA3MjIyNTUsImV4cCI6MTc2MDc1MTA1NX0.hYqtuaQmOEYHvaFXf_AMafz10Lq0CZZCeS12KFqB__0
 
 ###
-POST http://localhost:3000/users HTTP/1.1
+POST http://localhost:4000/users HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Wilson",
-  "email": "wilson@empresa.com",
-  "password": "wil@123",
+  "name": "Dona Beth",
+  "email": "elizabeth@empresa.com",
+  "password": "beth@123",
   "phone": "16999999999",
-  "groupIds": [2]
+  "group": 2
 }
 
-
 ###
-GET http://localhost:3000/users HTTP/1.1
+GET http://localhost:4000/users HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 
 ###
-POST http://localhost:3000/users/login HTTP/1.1
+POST http://localhost:4000/users/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "adm@gmail.com",
-  "senha": "Adm@123"
+  "email": "elizabeth@empresa.com",
+  "senha": "beth@123"
 }
 
 ###
-PUT http://localhost:3000/users/1 HTTP/1.1
+PUT http://localhost:4000/users/1 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -43,6 +42,6 @@ Authorization: Bearer {{token}}
 }
 
 ###
-DELETE http://localhost:3000/users/1 HTTP/1.1
+DELETE http://localhost:4000/users/1 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}

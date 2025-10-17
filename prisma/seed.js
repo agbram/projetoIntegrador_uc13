@@ -62,8 +62,8 @@ async function main() {
   
   // 2) Cria Groups
   const groupsData = [
-    { name: 'Administrador',        description: 'Administrador' },
-    { name: 'Confeiteiras',description: 'Funcionário com acesso parcial' },
+    { name: 'Administrador', description: 'Administrador' },
+    { name: 'Confeiteiras', description: 'Funcionário com acesso parcial' },
   ];
 
   const groups = {};

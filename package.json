@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/api.js",
   "scripts": {
-    "dev": "nodemon src/api.js",
+    "dev": "cross-env PORT=4000 nodemon src/api.js",
     "build": "tsc",
     "start": "node src/api.js",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -29,6 +29,7 @@
     "venom-bot": "^5.3.0"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.17.0"
   }

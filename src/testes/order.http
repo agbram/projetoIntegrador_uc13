@@ -1,7 +1,7 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk5NTI5MzksImV4cCI6MTc1OTk4MTczOX0.Z9yfEvRArs9mlBEBRkMTRJYQSyKMsSLW4SQ1vnAYQYA
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiZWxpemFiZXRoQGVtcHJlc2EuY29tIiwibmFtZSI6IkRvbmEgQmV0aCIsImlhdCI6MTc2MDcyMzA2MCwiZXhwIjoxNzYwNzUxODYwfQ.XnheL0bPNqG-0_neAtGfo3Zr0HR7_TVBOzYz5R52Jxk
 
 ###
-POST http://localhost:3000/orders HTTP/1.1
+POST http://localhost:4000/orders HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -14,7 +14,7 @@ Authorization: Bearer {{token}}
 }
 
 ###
-PUT http://localhost:3000/orders/1 HTTP/1.1
+PUT http://localhost:4000/orders/1 HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
@@ -28,12 +28,12 @@ Authorization: Bearer {{token}}
 
 
 ###
-GET http://localhost:3000/orders HTTP/1.1
+GET http://localhost:4000/orders HTTP/1.1
 content-type: application/json
 Authorization: Bearer {{token}}
 
 ###
-POST http://localhost:3000/orders/1/items
+POST http://localhost:4000/orders/1/items
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -42,12 +42,12 @@ Authorization: Bearer {{token}}
   "quantity": 2
 }
 ###
-DELETE http://localhost:3000/orders/1/items/2
+DELETE http://localhost:4000/orders/1/items/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-PUT http://localhost:3000/orders/1/items/1
+PUT http://localhost:4000/orders/1/items/1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -57,7 +57,7 @@ Authorization: Bearer {{token}}
 }
 
 ###
-PUT http://localhost:3000/orders/1
+PUT http://localhost:4000/orders/1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

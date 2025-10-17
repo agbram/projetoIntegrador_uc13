@@ -41,9 +41,9 @@ export const UserController = {
 
 async store(req, res) {
   try {
-    const { name, email, password, phone, groupIds } = req.body;
+    const { name, email, password, phone, group } = req.body;
 
-    if (!name || !email || !password || !groupIds) {
+    if (!name || !email || !password || !group) {
       return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
     }
 
@@ -56,21 +56,29 @@ async store(req, res) {
         name,
         email,
         password: hash,
-        phone,
-        group: {
-          create: groupIds.map(gid => ({
-            group: { connect: { id: gid } }
-          }))
-        }
-      },
-      include: {
-        group: {
-          include: { group: true } // mostra os detalhes do grupo
-        }
+        phone
       }
+  });
+
+      await prisma.groupUser.create({
+      data: {
+        userId: user.id,
+        groupId: group, // aqui você passa o ID do grupo que veio do body
+      },
     });
 
-    res.status(201).json(user);
+    const userWithGroup = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: {
+        group: {
+          include: {
+            group:{select: { id: true, name: true }}, // isso puxa os dados do Group real
+          },
+        },
+      },
+    });
+
+    res.status(201).json(userWithGroup);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     res.status(500).json({ error: "Erro interno ao criar usuário." });
@@ -95,9 +103,18 @@ async store(req, res) {
         });
       } else {
         // se nao tiver filtro, retorna todos
-        users = await prisma.user.findMany();
-      }
-
+        users = await prisma.user.findMany({
+      include: {
+        group: {
+          include: {
+            group: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      },
+    });
+  }
       res.status(200).json(users);
     } catch (err) {
       res.status(500).json({ error: "Erro ao buscar usuarios!" });
