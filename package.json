@@ -8,6 +8,7 @@
     "dev": "cross-env PORT=4000 nodemon src/api.js",
     "build": "tsc",
     "start": "node src/api.js",
+    "postinstall": "npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node prisma/seed.js",
     "setup": "npm run seed && npm run dev"

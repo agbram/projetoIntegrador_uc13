@@ -60,8 +60,27 @@ export const CustomerController = {
         }
     },
 
+    async show(req, res, next){
+        try{
+           const cnpj = req.params.cnpj;
+           let check;
+
+           check = await prisma.customer.findFirst({
+            where:{cnpj},
+           });
+           if (check) {
+            return res.status(200).json({customer: check});
+           } else {
+            return res.status(404).send();
+           }
+
+        } catch(err){
+            next(err);
+        }
+    },
+
     // Atualizar um cliente existente
-    async update (req, res, next) {
+    async update(req, res, next) {
         try {
             
             const id = Number(req.params.id);
