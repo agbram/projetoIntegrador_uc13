@@ -17,7 +17,7 @@ export function verificaRule(requiredRole) {
       });
       
       if (!vinculo)
-        return res.status(403).json({ error: "Usuário não autorizado" });
+        return res.status(401).json({ error: "Usuário não autorizado" });
       return next();
       
     } catch (err) {

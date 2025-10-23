@@ -120,5 +120,6 @@ router.put('/:id', verificaRule("ADM"), CustomerController.update);
  *         description: Cliente não encontrado
  */
 router.delete('/:id', verificaRule("ADM"), CustomerController.delete);
+router.get('/check-cnpj/:cnpj', verificaRule("ADM"), CustomerController.show);
 
 export default router;
