@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,17 +12,23 @@ enum Modality {
   Varejo
 }
 
+enum CustomerType {
+  PF_CPF
+  PJ_CNPJ
+}
+
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        Int          @id @default(autoincrement())
   name      String
-  cnpj      String   @unique
+  type      CustomerType @default(PJ_CNPJ)
+  document  String       @unique
   contact   String?
-  email     String?  @unique
+  email     String?      @unique
   address   String?
   note      String?
   modality  Modality
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   orders Order[]
 
@@ -35,21 +41,21 @@ enum Category {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   description String?
-  
-  category      Category 
-  costPrice     Float   @default(0)
-  markupPercent Float   @default(0)
-  salePrice     Float   @default(0)
-  stockQuantity Int     @default(0)
-  isActive      Boolean @default(true)
+
+  category      Category
+  costPrice     Float    @default(0)
+  markupPercent Float    @default(0)
+  salePrice     Float    @default(0)
+  stockQuantity Int      @default(0)
+  isActive      Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orderItems    OrderItem[]
+  orderItems OrderItem[]
 
   @@map("products")
 }
@@ -59,7 +65,7 @@ model Order {
   customerId Int
   customer   Customer @relation(fields: [customerId], references: [id])
 
-  userId Int? @default(1)
+  userId Int?  @default(1)
   user   User? @relation(fields: [userId], references: [id])
 
   orderDate    DateTime  @default(now())
@@ -126,16 +132,16 @@ model SupplyPurchase {
 }
 
 model PurchaseItem {
-  id         Int             @id @default(autoincrement())
+  id         Int            @id @default(autoincrement())
   purchaseId Int
-  purchase   SupplyPurchase  @relation(fields: [purchaseId], references: [id])
+  purchase   SupplyPurchase @relation(fields: [purchaseId], references: [id])
 
-  supplyId   Int
-  supply     Supply          @relation(fields: [supplyId], references: [id])
+  supplyId Int
+  supply   Supply @relation(fields: [supplyId], references: [id])
 
-  quantity   Float @default(1)     // insumos podem ser fracionados
-  unitPrice  Float?
-  subtotal   Float?
+  quantity  Float  @default(1) // insumos podem ser fracionados
+  unitPrice Float?
+  subtotal  Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -143,29 +149,28 @@ model PurchaseItem {
   @@map("purchase_items")
 }
 
-
 model Supply {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   description String?
-  unit        String?       // ex.: kg, g, L, pacote
-  unitPrice   Float?        // preço médio de compra
-  stockQty    Float? @default(0)  // estoque do insumo da cliente
+  unit        String? // ex.: kg, g, L, pacote
+  unitPrice   Float? // preço médio de compra
+  stockQty    Float?  @default(0) // estoque do insumo da cliente
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   purchaseItems PurchaseItem[]
-  
+
   @@map("supplies")
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  name       String?
-  email      String  @unique
-  password   String
-  phone      String?
+  id       Int     @id @default(autoincrement())
+  name     String?
+  email    String  @unique
+  password String
+  phone    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,16 +183,16 @@ model User {
 }
 
 model Rule {
-  id Int @id @default(autoincrement())
-  name String @unique
+  id          Int    @id @default(autoincrement())
+  name        String @unique
   description String
 
   groups RuleGroup[]
 }
 
 model Group {
-  id Int @id @default(autoincrement())
-  name String @unique
+  id          Int    @id @default(autoincrement())
+  name        String @unique
   description String
 
   rules RuleGroup[]
@@ -197,10 +202,10 @@ model Group {
 model GroupUser {
   id Int @id @default(autoincrement())
 
-  user User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  group Group @relation(fields: [groupId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id])
   groupId Int
 
   @@unique([userId, groupId], name: "userId_groupId")
@@ -209,12 +214,11 @@ model GroupUser {
 model RuleGroup {
   id Int @id @default(autoincrement())
 
-  group Group @relation(fields: [groupId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id])
   groupId Int
 
-  rule Rule @relation(fields: [ruleId], references: [id])
+  rule   Rule @relation(fields: [ruleId], references: [id])
   ruleId Int
 
   @@unique([groupId, ruleId], name: "groupId_ruleId")
 }
-
