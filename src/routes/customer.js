@@ -82,8 +82,10 @@ router.get('/', verificaRule("ADM"), CustomerController.index);
  *             properties:
  *               name:
  *                 type: string
- *               cnpj:
+ *               document:
  *                 type: string
+ *               type: 
+ *                  type: string
  *               contact:
  *                 type: string
  *               email:

@@ -6,12 +6,12 @@ export const CustomerController = {
     async store(req, res, next) {
         try {
 
-            const { name, cnpj, contact, email, address, note, modality } = req.body;
+            const { name, document, type, contact, email, address, note, modality } = req.body;
 
                   const existingCustomer = await prisma.customer.findFirst({
         where: {
           OR: [
-            { cnpj: cnpj },
+            { document: document },
             { email: email }
           ]
         }
@@ -26,7 +26,8 @@ export const CustomerController = {
             const newCustomer = await prisma.customer.create({
                 data: {
                     name,
-                    cnpj,
+                    document,
+                    type,
                     contact,
                     email,
                     address,
@@ -62,11 +63,11 @@ export const CustomerController = {
 
     async show(req, res, next){
         try{
-           const cnpj = req.params.cnpj;
+           const document = req.params.cnpj;
            let check;
 
            check = await prisma.customer.findFirst({
-            where:{cnpj},
+            where:{document},
            });
            if (check) {
             return res.status(200).json({customer: check});
@@ -88,7 +89,6 @@ export const CustomerController = {
             let query = {};
 
             if (req.body.name) {query.name = req.body.name;}
-            if (req.body.cnpj) {query.cnpj = req.body.cnpj;}
             if (req.body.contact) {query.contact = req.body.contact;}
             if (req.body.email) {query.email = req.body.email;}
             if (req.body.address) {query.address = req.body.address;}
