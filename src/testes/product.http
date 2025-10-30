@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NTk2MDU3MzYsImV4cCI6MTc1OTYzNDUzNn0.ijSXxgEdNF4AxCbsTidbJNCAKZjzcheLTE1llMRMoxE
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjE3NTkyNjcsImV4cCI6MTc2MTc4ODA2N30.ckdOqagp0mN-XH8bCKN5mPjk8gBYiXxqMrGcpaEHwyg
 
 ###
 POST http://localhost:4000/products HTTP/1.1
@@ -6,14 +6,23 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Dolce di Pistacchio",
-  "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
-  "category": "BOLOS",
-  "costPrice": 15.90,
+  "name": "Bolo de manga",
+  "costPrice": 120,
   "markupPercent": 120,
-  "stockQuantity": 10,
-  "isActive": true
+  "stockQuantity": 12,
+  "category": "BOLOS",
 }
+
+# {
+#   "name": "Dolce di Pistacchio",
+#   "description": "Bolo macio de pistache com recheio cremoso de ganache de pistache, finalizado com cobertura sedosa e pistaches torrados crocantes.",
+#   "category": "BOLOS",
+#   "costPrice": 15.90,
+#   "markupPercent": 120,
+#   "stockQuantity": 10,
+#   "isActive": true
+# }
+
 
 ###
 GET http://localhost:4000/products HTTP/1.1
