@@ -2,6 +2,8 @@ import prisma from "../prisma.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import foto from "../function/makeUrlFromImagemBase64.js"
+import makeUrlFromImagemBase64 from "../function/makeUrlFromImagemBase64.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,39 +27,8 @@ export const ProductController = {
         return res.status(400).json({ error: "Nome e categoria são obrigatórios" });
       }
 
-      let fotoUrl;
-
-      if (fotoData){
-        const [base64Pre, base64Data] = fotoData.split(",");
-        // Converte Base64 para buffer binário
-        const buffer = Buffer.from(base64Data, "base64");
-
-        // Garante que a pasta uploads exista
-        const uploadDir = path.join(__dirname, "../../imagens");
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir);
-        }
-        const type = base64Pre.split(";")[0].split(":")[1];
-
-        let extensao = "bin"; 
-
-        if (type == "image/png") {
-          extensao = "png"
-        } else if (type == "image/jpg" || type == "image/jpeg") {
-          extensao = "jpg"
-        } else {
-          return res.status(400).json({ error: "arquivo indesiflado" });
-        }
-
-        const filename = `produto-${Math.random()}.${extensao}`;
-        // Cria o caminho final do arquivo
-        const caminhoArquivo = path.join(uploadDir, filename);
-        fotoUrl = `/imagens/${filename}`
-
-        // Salva o arquivo
-        fs.writeFileSync(caminhoArquivo, buffer);
-      }
-
+      let fotoUrl = makeUrlFromImagemBase64(fotoData);
+      
       const salePrice = costPrice * (1 + markupPercent / 100);
 
       const p = await prisma.product.create({
@@ -139,26 +110,27 @@ export const ProductController = {
   async update(req, res, next) {
     try {
 
-      let body = {};
+      let data = {};
 
-      if (req.body.name) body.name = req.body.name;
-      if (req.body.description) body.description = req.body.description;
-      if (req.body.category) body.category = req.body.category;
-      if (req.body.costPrice) body.costPrice = req.body.costPrice;
-      if (req.body.markupPercent) body.markupPercent = req.body.markupPercent;
-      if (req.body.stockQuantity) body.stockQuantity = req.body.stockQuantity;
-      if (req.body.isActive) body.isActive = req.body.isActive;
+      if (req.body.name) data.name = req.body.name;
+      if (req.body.description) data.description = req.body.description;
+      if (req.body.category) data.category = req.body.category;
+      if (req.body.costPrice) data.costPrice = req.body.costPrice;
+      if (req.body.markupPercent) data.markupPercent = req.body.markupPercent;
+      if (req.body.stockQuantity) data.stockQuantity = req.body.stockQuantity;
+      if (req.body.isActive) data.isActive = req.body.isActive;
+      if (req.body.fotoData) data.fotoUrl = makeUrlFromImagemBase64(req.body.fotoData);
 
-      const costPrice = body.costPrice !== undefined ? body.costPrice : currentProduct.costPrice;
-      const markupPercent = body.markupPercent !== undefined ? body.markupPercent : currentProduct.markupPercent;
+      const costPrice = data.costPrice !== undefined ? data.costPrice : currentProduct.costPrice;
+      const markupPercent = data.markupPercent !== undefined ? data.markupPercent : currentProduct.markupPercent;
 
-      body.salePrice = costPrice * (1 + markupPercent / 100);
+      data.salePrice = costPrice * (1 + markupPercent / 100);
 
       const id = Number(req.params.id);
 
       const p = await prisma.product.update({
         where: { id },
-        data: body,
+        data: data,
       });
 
       res.status(200).json(p);
