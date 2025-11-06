@@ -38,7 +38,6 @@ Authorization: Bearer {{token}}
   "email": "teste8@gmail.com",
   "password": "teste8",
   "phone": "16992455837",
-  "permission": false
 }
 
 ###

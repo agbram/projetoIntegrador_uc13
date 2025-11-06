@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjE1ODkxNDcsImV4cCI6MTc2MTYxNzk0N30.khtBRnOHcHk856kBQvbImXh6FuY70A5ZY6yMz1zL_14
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjIxMTMxNDQsImV4cCI6MTc2MjE0MTk0NH0.k7Et9Usq_h2ETV-JQ3HMhneClgm91BjeL23f5zs-pR0
 
 ### Criar um novo usuário
 POST http://localhost:4000/customers HTTP/1.1
@@ -16,26 +16,48 @@ Authorization: Bearer {{token}}
 }
 
 ###
+GET http://localhost:4000/customers/?isActive=false HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
 GET http://localhost:4000/customers HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-PUT http://localhost:4000/customers/1 HTTP/1.1
+PUT http://localhost:4000/customers/6 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "name": "Nome teste",
-    "cnpj": "12345678000195",
-    "contact": "16992455837",
-    "email": "Customerteste@gmail.com",
-    "address": "Rua teste, 123",
-    "note": "Cliente geralmente pede as terças",
-    "modality": "Atacado"
+    "isActive": false
 }
 
+
+
+# {
+#     "name": "teste1",
+#     "type": "PF_CPF",
+#     "document": "12345678000198",
+#     "contact": "16992455837",
+#     "email": "Customertest@gmail.com",
+#     "address": "Rua teste, 123",
+#     "modality": "Atacado"
+# }
+
+
 ###
-GET http://localhost:4000/customers/check-cnpj/12345678923 HTTP/1.1
+DELETE http://localhost:4000/customers/1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:4000/customers/check-document/480.011.393-87 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:4000/customers/allCustomers HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
