@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjE3NTkyNjcsImV4cCI6MTc2MTc4ODA2N30.ckdOqagp0mN-XH8bCKN5mPjk8gBYiXxqMrGcpaEHwyg
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjI0NTc0MTcsImV4cCI6MTc2MjQ4NjIxN30.ihFiA2xA_tIyIkRsB1lyC52xcCSxiPk81Kd9lXoizwA
 
 ###
 POST http://localhost:4000/products HTTP/1.1
@@ -11,6 +11,7 @@ Authorization: Bearer {{token}}
   "markupPercent": 120,
   "stockQuantity": 12,
   "category": "BOLOS",
+  "fotoData": "",
 }
 
 # {
@@ -52,3 +53,9 @@ Authorization: Bearer {{token}}
 {
   "stockQuantity": 10
 }
+###
+DELETE  http://localhost:4000/products/14 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
