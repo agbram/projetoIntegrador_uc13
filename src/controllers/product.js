@@ -1,13 +1,5 @@
 import prisma from "../prisma.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import foto from "../function/makeUrlFromImagemBase64.js"
 import makeUrlFromImagemBase64 from "../function/makeUrlFromImagemBase64.js";
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const ProductController = {
   async store(req, res, next) {

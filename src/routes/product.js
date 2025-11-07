@@ -107,4 +107,24 @@ router.get('/:id', ProductController.show);
  */
 router.put('/:id', ProductController.update);
 
+/**
+ * @swagger
+ * /product/{id}:
+ *   delete:
+ *     summary: Remove um produtos pelo ID
+ *     tags: [product]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: produtos deletado
+ *       404:
+ *         description: produtos não encontrado
+ */
+router.delete("/:id", ProductController.del);
+
 export default router;
