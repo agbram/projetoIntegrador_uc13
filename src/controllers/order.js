@@ -63,11 +63,11 @@ export const OrderController = {
 
   async show(req, res, next) {
     try {
-      const id = Number(req.params.id);
+      const id = Number(req.params.name);
 
       const o = await prisma.order.findUnique({
         where: { id },
-        include: { items: true, customer: true },
+        include: { items: true, clustomer: true },
       });
 
       res.status(200).json(o);

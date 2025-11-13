@@ -30,7 +30,7 @@ export const UserController = {
           name: u.name,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "8h" }
+        { expiresIn: "10h" }
       );
 
       return res.json({ token });

@@ -123,5 +123,6 @@ router.put('/:id', verificaRule("ADM"), CustomerController.put);
  */
 router.delete('/:id', verificaRule("ADM"), CustomerController.delete);
 router.get('/check-document/:document', verificaRule("ADM"), CustomerController.show);
+router.get('/search', CustomerController.search);
 
 export default router;
