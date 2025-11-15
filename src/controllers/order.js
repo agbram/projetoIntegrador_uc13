@@ -3,7 +3,7 @@ import prisma from "../prisma.js";
 export const OrderController = {
   async store(req, res, next) {
     try {
-      const { orderDate, deliveryDate, status, notes, customerId } = req.body;
+      const { orderDate, deliveryDate, status, notes, customerId, items } = req.body;
 
       if (!orderDate || !deliveryDate || !customerId) {
         return res.status(400).json({
@@ -11,20 +11,51 @@ export const OrderController = {
         });
       }
 
-      const o = await prisma.order.create({
+      const itemsComCalculo = await Promise.all(
+        items.map(async (item) => {
+          const product = await prisma.product.findUnique({
+            where: { id: item.productId }
+          });
+
+          if (!product) {
+            throw new Error(`Produto com ID ${item.productId} não encontrado`);
+          }
+
+          return {
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: product.salePrice,
+            subtotal: product.salePrice * item.quantity
+          };
+        })
+      );
+
+      const total = itemsComCalculo.reduce((sum, item) => sum + item.subtotal, 0);
+
+      const order = await prisma.order.create({
         data: {
           customer: { connect: { id: customerId } },
           orderDate: new Date(orderDate),
           deliveryDate: new Date(deliveryDate),
           status: status || "PENDING",
           notes,
-          total: 0,
+          total,
+          items: {
+            create: itemsComCalculo
+          }
         },
-        include: { items: true, customer: true },
+        include: { 
+          items: {
+            include: {
+              product: true 
+            }
+          }, 
+          customer: true 
+        },
       });
 
-      console.log("Order created: ", o);
-      res.status(201).json(o);
+      console.log("Order created: ", order);
+      res.status(201).json(order);
     } catch (error) {
       console.error("Erro ao criar pedido:", error);
       next(error);
@@ -46,11 +77,25 @@ export const OrderController = {
               status ? { status: { contains: status } } : {},
             ],
           },
-          include: { items: true, customer: true },
+          include: { 
+            items: {
+              include: {
+                product: true 
+              }
+            }, 
+            customer: true 
+          },
         });
       } else {
         orders = await prisma.order.findMany({
-          include: { items: true, customer: true },
+          include: { 
+            items: {
+              include: {
+                product: true 
+              }
+            }, 
+            customer: true 
+          },
         });
       }
 
@@ -63,14 +108,25 @@ export const OrderController = {
 
   async show(req, res, next) {
     try {
-      const id = Number(req.params.name);
+      const id = Number(req.params.id); 
 
-      const o = await prisma.order.findUnique({
+      const order = await prisma.order.findUnique({
         where: { id },
-        include: { items: true, clustomer: true },
+        include: { 
+          items: {
+            include: {
+              product: true 
+            }
+          }, 
+          customer: true 
+        },
       });
 
-      res.status(200).json(o);
+      if (!order) {
+        return res.status(404).json({ error: "Pedido não encontrado" });
+      }
+
+      res.status(200).json(order);
     } catch (error) {
       console.error("Erro ao buscar pedido!", error);
       next(error);
@@ -81,11 +137,11 @@ export const OrderController = {
     try {
       const id = Number(req.params.id);
 
-      const o = await prisma.order.delete({
+      const order = await prisma.order.delete({
         where: { id },
       });
 
-      res.status(200).json(o);
+      res.status(200).json(order);
     } catch (error) {
       console.error("Erro ao deletar pedido!", error);
       next(error);
@@ -97,7 +153,7 @@ export const OrderController = {
       const id = Number(req.params.id);
       const { orderDate, deliveryDate, status, notes } = req.body;
 
-      const o = await prisma.order.update({
+      const order = await prisma.order.update({
         where: { id },
         data: {
           orderDate: orderDate ? new Date(orderDate) : undefined,
@@ -105,10 +161,17 @@ export const OrderController = {
           status,
           notes,
         },
-        include: { items: true, customer: true },
+        include: { 
+          items: {
+            include: {
+              product: true
+            }
+          }, 
+          customer: true 
+        },
       });
 
-      res.status(200).json(o);
+      res.status(200).json(order);
     } catch (error) {
       console.error("Erro ao atualizar pedido!", error);
       next(error);
@@ -145,10 +208,16 @@ export const OrderController = {
           unitPrice,
           subtotal,
         },
+        include: {
+          product: true
+        }
       });
 
       const items = await prisma.orderItem.findMany({
         where: { orderId: Number(orderId) },
+        include: {
+          product: true
+        }
       });
 
       const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
@@ -175,7 +244,11 @@ export const OrderController = {
 
       const items = await prisma.orderItem.findMany({
         where: { orderId: Number(orderId) },
+        include: {
+          product: true
+        }
       });
+      
       const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
 
       await prisma.order.update({
@@ -190,7 +263,7 @@ export const OrderController = {
     }
   },
 
-async updateItem(req, res, next) {
+  async updateItem(req, res, next) {
     try {
       const { orderId, itemId } = req.params;
       const { productId, quantity } = req.body;
@@ -257,25 +330,24 @@ async updateItem(req, res, next) {
     }
   },
 
-async atualizaStatus(req, res, next) {
+  async atualizaStatus(req, res, next) {
     try {
       const id = Number(req.params.id);
       const { status } = req.body;
 
-      if (!["PENDENTE", "EM PRODUÇÃO", "CONCLUÍDO", "CANCELADO"].includes(status)) {
+      if (!["PENDING", "IN_PROGRESS", "DELIVERED", "CANCELLED"].includes(status)) {
         return res.status(400).json({ error: "Status inválido." });
       }
 
-      const o = await prisma.order.update({
+      const order = await prisma.order.update({
         where: { id },
         data: { status }
       });
 
-      res.status(200).json(o);
+      res.status(200).json(order);
     } catch (error) {
       console.error("Erro ao atualizar status do pedido!", error);
       next(error);
     }
-},
+  },
 }
-
