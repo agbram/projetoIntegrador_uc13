@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjI4MDQyMTEsImV4cCI6MTc2MjgzMzAxMX0.RuOoC8fIpL3yZRmLdame8irIwJedwG8Whgu9Ay_-NdA
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjMzMDgzOTIsImV4cCI6MTc2MzM0NDM5Mn0.5xnjyKnUldXbml3GWDkToeoyMV4Ts8fDC7AuhNsBWns
 
 ### Criar um novo usuário
 POST http://localhost:4000/customers HTTP/1.1
@@ -6,11 +6,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "name": "teste1",
+    "name": "teste2",
     "type": "PF_CPF",
-    "document": "12345678000198",
+    "document": "41616984880",
     "contact": "16992455837",
-    "email": "Customertest@gmail.com",
+    "email": "Customerteste@gmail.com",
     "address": "Rua teste, 123",
     "modality": "Atacado"
 }

@@ -1,9 +1,11 @@
 import prisma from "../prisma.js";
+import { TaskController } from "./tasks.js";
 
 export const OrderController = {
   async store(req, res, next) {
     try {
-      const { orderDate, deliveryDate, status, notes, customerId, items } = req.body;
+      const { orderDate, deliveryDate, status, notes, customerId, items } =
+        req.body;
 
       if (!orderDate || !deliveryDate || !customerId) {
         return res.status(400).json({
@@ -14,7 +16,7 @@ export const OrderController = {
       const itemsComCalculo = await Promise.all(
         items.map(async (item) => {
           const product = await prisma.product.findUnique({
-            where: { id: item.productId }
+            where: { id: item.productId },
           });
 
           if (!product) {
@@ -25,12 +27,15 @@ export const OrderController = {
             productId: item.productId,
             quantity: item.quantity,
             unitPrice: product.salePrice,
-            subtotal: product.salePrice * item.quantity
+            subtotal: product.salePrice * item.quantity,
           };
         })
       );
 
-      const total = itemsComCalculo.reduce((sum, item) => sum + item.subtotal, 0);
+      const total = itemsComCalculo.reduce(
+        (sum, item) => sum + item.subtotal,
+        0
+      );
 
       const order = await prisma.order.create({
         data: {
@@ -41,23 +46,174 @@ export const OrderController = {
           notes,
           total,
           items: {
-            create: itemsComCalculo
-          }
+            create: itemsComCalculo,
+          },
+          productionSynced: false,
         },
-        include: { 
+        include: {
           items: {
             include: {
-              product: true 
-            }
-          }, 
-          customer: true 
+              product: true,
+            },
+          },
+          customer: true,
         },
       });
+      
+      console.log("✅ Order created: ", order);
 
-      console.log("Order created: ", order);
+      // ✅ CORREÇÃO: Sincronizar tarefas de produção APÓS criar o pedido
+      try {
+        await TaskController.syncProductionTasks(order.id);
+        console.log("✅ Tarefas de produção sincronizadas para o pedido:", order.id);
+      } catch (syncError) {
+        console.error("Erro ao sincronizar tarefas de produção:", syncError);
+        // Não falhar o pedido por causa disso, apenas log o erro
+      }
+      
       res.status(201).json(order);
     } catch (error) {
       console.error("Erro ao criar pedido:", error);
+      next(error);
+    }
+  },
+
+  // ✅ NOVO MÉTODO: Atualizar status baseado na produção
+  async updateStatusBasedOnProduction(orderId) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+
+      if (!order) return;
+
+      // Verificar se todos os itens foram produzidos
+      const allItemsProduced = await Promise.all(
+        order.items.map(async (item) => {
+          const productionTask = await prisma.productionTask.findUnique({
+            where: { productId: item.productId }
+          });
+          
+          return productionTask && 
+                 productionTask.completedQuantity >= item.quantity;
+        })
+      );
+
+      const isFullyProduced = allItemsProduced.every(Boolean);
+
+      if (isFullyProduced && order.status !== 'PRODUCTION_COMPLETE') {
+        await prisma.order.update({
+          where: { id: orderId },
+          data: { status: 'PRODUCTION_COMPLETE' }
+        });
+        console.log(`✅ Pedido ${orderId} marcado como produção concluída`);
+      }
+
+    } catch (error) {
+      console.error(`❌ Erro ao atualizar status do pedido ${orderId}:`, error);
+    }
+  },
+async checkAllOrdersProductionStatus(req, res, next) {
+  try {
+    const allOrders = await prisma.order.findMany({
+      where: {
+        status: {
+          in: ['PENDING', 'IN_PROGRESS', 'IN_PRODUCTION']
+        }
+      },
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    let updatedCount = 0;
+
+    for (const order of allOrders) {
+      let allItemsProduced = true;
+
+      for (const item of order.items) {
+        const productionTask = await prisma.productionTask.findUnique({
+          where: { productId: item.productId }
+        });
+        
+        if (!productionTask || 
+            productionTask.status !== 'COMPLETED' || 
+            productionTask.completedQuantity < item.quantity) {
+          allItemsProduced = false;
+          break;
+        }
+      }
+
+      if (allItemsProduced && order.status !== 'READY_FOR_DELIVERY') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'READY_FOR_DELIVERY' }
+        });
+        updatedCount++;
+        console.log(`✅ Pedido ${order.id} atualizado para PRONTO PARA ENTREGA`);
+      }
+    }
+
+    res.status(200).json({
+      message: `Verificação concluída. ${updatedCount} pedidos atualizados para pronto para entrega.`,
+      updatedCount
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao verificar status dos pedidos:', error);
+    next(error);
+  }
+},
+
+  async atualizaStatus(req, res, next) {
+    try {
+      const id = Number(req.params.id);
+      const { status } = req.body;
+
+      // ✅ STATUS EXPANDIDOS - Incluindo status de produção
+      const validStatuses = [
+        "PENDING", 
+        "IN_PROGRESS", 
+        "IN_PRODUCTION", 
+        "READY_FOR_DELIVERY",
+        "DELIVERED", 
+        "CANCELLED",
+        "PRODUCTION_COMPLETE" 
+      ];
+
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: `Status inválido. Use: ${validStatuses.join(', ')}` 
+        });
+      }
+
+      const order = await prisma.order.update({
+        where: { id },
+        data: { status },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+          customer: true,
+        },
+      });
+
+      res.status(200).json(order);
+    } catch (error) {
+      console.error("❌ Erro ao atualizar status do pedido!", error);
       next(error);
     }
   },
@@ -73,33 +229,72 @@ export const OrderController = {
           where: {
             OR: [
               orderDate ? { orderDate: { equals: new Date(orderDate) } } : {},
-              deliveryDate ? { deliveryDate: { equals: new Date(deliveryDate) } } : {},
+              deliveryDate
+                ? { deliveryDate: { equals: new Date(deliveryDate) } }
+                : {},
               status ? { status: { contains: status } } : {},
             ],
           },
-          include: { 
+          include: {
             items: {
               include: {
-                product: true 
-              }
-            }, 
-            customer: true 
+                product: {
+                  include: {
+                    ProductionTask: true,
+                  }
+                }
+              },
+            },
+            customer: true,
           },
         });
       } else {
         orders = await prisma.order.findMany({
-          include: { 
+          include: {
             items: {
               include: {
-                product: true 
-              }
-            }, 
-            customer: true 
+                product: {
+                  include: {
+                    ProductionTask: true
+                  }
+                }
+              },
+            },
+            customer: true,
           },
         });
       }
 
-      res.status(200).json(orders);
+       const ordersWithProductionProgress = orders.map(order => {
+      const itemsWithProgress = order.items.map(item => {
+        const productionTask = item.product.ProductionTask;
+        let producedQuantity = 0;
+        let isFullyProduced = false;
+        let productionProgress = 0;
+
+        if (productionTask) {
+
+          producedQuantity = Math.min(productionTask.completedQuantity, item.quantity);
+          isFullyProduced = productionTask.completedQuantity >= item.quantity;
+          productionProgress = (producedQuantity / item.quantity) * 100;
+        }
+
+        return {
+          ...item,
+          producedQuantity,
+          isFullyProduced,
+          productionProgress,
+          productionStatus: productionTask?.status || 'NO_TASK'
+        };
+      });
+
+      return {
+        ...order,
+        items: itemsWithProgress
+      };
+    });
+
+      res.status(200).json(ordersWithProductionProgress);
     } catch (err) {
       console.error("Erro ao buscar pedidos!", err);
       next(err);
@@ -108,17 +303,21 @@ export const OrderController = {
 
   async show(req, res, next) {
     try {
-      const id = Number(req.params.id); 
+      const id = Number(req.params.id);
 
       const order = await prisma.order.findUnique({
         where: { id },
-        include: { 
+        include: {
           items: {
             include: {
-              product: true 
-            }
-          }, 
-          customer: true 
+              product: {
+                include: {
+                  ProductionTask: true,
+                }
+              }
+            },
+          },
+          customer: true,
         },
       });
 
@@ -126,7 +325,33 @@ export const OrderController = {
         return res.status(404).json({ error: "Pedido não encontrado" });
       }
 
-      res.status(200).json(order);
+      const itemsWithProgress = order.items.map(item => {
+      const productionTask = item.product.ProductionTask;
+      let producedQuantity = 0;
+      let isFullyProduced = false;
+      let productionProgress = 0;
+
+      if (productionTask) {
+        producedQuantity = Math.min(productionTask.completedQuantity, item.quantity);
+        isFullyProduced = productionTask.completedQuantity >= item.quantity;
+        productionProgress = (producedQuantity / item.quantity) * 100;
+      }
+
+      return {
+        ...item,
+        producedQuantity,
+        isFullyProduced,
+        productionProgress,
+        productionStatus: productionTask?.status || 'NO_TASK'
+      };
+    });
+
+    const orderWithProgress = {
+      ...order,
+      items: itemsWithProgress
+    };
+
+      res.status(200).json(orderWithProgress);
     } catch (error) {
       console.error("Erro ao buscar pedido!", error);
       next(error);
@@ -161,13 +386,13 @@ export const OrderController = {
           status,
           notes,
         },
-        include: { 
+        include: {
           items: {
             include: {
-              product: true
-            }
-          }, 
-          customer: true 
+              product: true,
+            },
+          },
+          customer: true,
         },
       });
 
@@ -209,15 +434,15 @@ export const OrderController = {
           subtotal,
         },
         include: {
-          product: true
-        }
+          product: true,
+        },
       });
 
       const items = await prisma.orderItem.findMany({
         where: { orderId: Number(orderId) },
         include: {
-          product: true
-        }
+          product: true,
+        },
       });
 
       const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
@@ -245,10 +470,10 @@ export const OrderController = {
       const items = await prisma.orderItem.findMany({
         where: { orderId: Number(orderId) },
         include: {
-          product: true
-        }
+          product: true,
+        },
       });
-      
+
       const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
 
       await prisma.order.update({
@@ -299,11 +524,15 @@ export const OrderController = {
       });
 
       if (!existingItem) {
-        return res.status(404).json({ error: "Item do pedido não encontrado." });
+        return res
+          .status(404)
+          .json({ error: "Item do pedido não encontrado." });
       }
 
       if (existingItem.orderId !== Number(orderId)) {
-        return res.status(400).json({ error: "Item não pertence a este pedido." });
+        return res
+          .status(400)
+          .json({ error: "Item não pertence a este pedido." });
       }
 
       const subtotal = product.salePrice * quantity;
@@ -328,26 +557,5 @@ export const OrderController = {
       console.error("Erro ao atualizar item do pedido:", error);
       next(error);
     }
-  },
-
-  async atualizaStatus(req, res, next) {
-    try {
-      const id = Number(req.params.id);
-      const { status } = req.body;
-
-      if (!["PENDING", "IN_PROGRESS", "DELIVERED", "CANCELLED"].includes(status)) {
-        return res.status(400).json({ error: "Status inválido." });
-      }
-
-      const order = await prisma.order.update({
-        where: { id },
-        data: { status }
-      });
-
-      res.status(200).json(order);
-    } catch (error) {
-      console.error("Erro ao atualizar status do pedido!", error);
-      next(error);
-    }
-  },
-}
+  }
+};

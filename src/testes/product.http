@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjMxNDk4NTYsImV4cCI6MTc2MzE4NTg1Nn0.K1GJ8oyqBG5Iwf7iLPf46avhkNNWgPR7ZBnBArZzyGU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjMzMTU2NDIsImV4cCI6MTc2MzM1MTY0Mn0.n3gOA6X0a6onkQoJfCDQ8Tyz2wYh8iW0VSltB8VMGZM
 
 ###
 POST http://localhost:4000/products HTTP/1.1
@@ -6,12 +6,12 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Bolo de pistache",
+  "name": "Bolo de Coco",
   "costPrice": 120,
   "markupPercent": 120,
-  "stockQuantity": 12,
+  "stockQuantity": 50,
   "category": "BOLOS",
-  "fotoData": "",
+  "fotoData": ""
 }
 
 # {
