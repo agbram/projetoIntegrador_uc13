@@ -30,10 +30,10 @@ router.delete('/', TaskController.clearCompleted);
 // 🔄 Sincronização inteligente (RECOMENDADA)
 router.post('/sync-new-orders', TaskController.syncNewOrdersOnly);
 
-// 📊 Status de sincronização
+//  Status de sincronização
 router.get('/sync-status', TaskController.getSyncStatus);
 
-// 🧹 Sincronização completa (APENAS PARA CASOS ESPECÍFICOS)
+//  Sincronização completa (APENAS PARA CASOS ESPECÍFICOS)
 router.post('/sync-all-orders-clean', TaskController.syncAllOrdersClean);
 
 export default router;
