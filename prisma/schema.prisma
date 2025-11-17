@@ -57,7 +57,8 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orderItems OrderItem[]
+  orderItems     OrderItem[]
+  ProductionTask ProductionTask?
 
   @@map("products")
 }
@@ -75,6 +76,8 @@ model Order {
   status       String    @default("PENDING")
   notes        String?
   total        Float?
+  productionSynced  Boolean @default(false)
+  syncedAt         DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,6 +98,7 @@ model OrderItem {
   quantity  Int   @default(1)
   unitPrice Float
   subtotal  Float
+  productionCounted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -223,4 +227,39 @@ model RuleGroup {
   ruleId Int
 
   @@unique([groupId, ruleId], name: "groupId_ruleId")
+}
+
+enum ProductionStatus {
+  PENDING
+  IN_PRODUCTION
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model ProductionTask {
+  id                Int              @id @default(autoincrement())
+  productId         Int
+  product           Product          @relation(fields: [productId], references: [id])
+  totalQuantity     Int // Quantidade total a ser produzida
+  pendingQuantity   Int // Quantidade pendente de produção
+  completedQuantity Int              @default(0) // Quantidade já produzida
+  status            ProductionStatus @default(PENDING)
+  priority          Priority         @default(MEDIUM)
+  dueDate           DateTime? // Data mais urgente de entrega
+  processedOrders Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@unique([productId])
+  @@index([productId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([priority])
 }

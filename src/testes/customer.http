@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjIxMTMxNDQsImV4cCI6MTc2MjE0MTk0NH0.k7Et9Usq_h2ETV-JQ3HMhneClgm91BjeL23f5zs-pR0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjMzMDgzOTIsImV4cCI6MTc2MzM0NDM5Mn0.5xnjyKnUldXbml3GWDkToeoyMV4Ts8fDC7AuhNsBWns
 
 ### Criar um novo usuário
 POST http://localhost:4000/customers HTTP/1.1
@@ -6,11 +6,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "name": "teste1",
+    "name": "teste2",
     "type": "PF_CPF",
-    "document": "12345678000198",
+    "document": "41616984880",
     "contact": "16992455837",
-    "email": "Customertest@gmail.com",
+    "email": "Customerteste@gmail.com",
     "address": "Rua teste, 123",
     "modality": "Atacado"
 }
@@ -53,11 +53,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-GET http://localhost:4000/customers/check-document/480.011.393-87 HTTP/1.1
+GET http://localhost:4000/customers/check-document/416.169.848-80 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-GET http://localhost:4000/customers/allCustomers HTTP/1.1
+GET http://localhost:4000/customers/search HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}

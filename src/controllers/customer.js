@@ -93,6 +93,35 @@ async inactives(req, res, next) {
     }
   },
 
+    async search(req, res, next) {
+    try {
+      const {name} = req.query;
+      const filter = {};
+
+      if (name) {
+        // Busca parcial no nome
+        filter.name = {
+          contains: name,
+        };
+      }
+
+
+      const customers = await prisma.customer.findMany({
+        where: filter,
+      });
+
+      if (customers.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "Nenhum cliente encontrado com os filtros fornecidos." });
+      }
+
+      return res.status(200).json(customers);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // Atualizar um cliente existente
   async put(req, res, next) {
     console.log(req.body);

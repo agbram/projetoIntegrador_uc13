@@ -7,6 +7,7 @@ import orderRoutes from "./routes/order.js";
 import productRoutes from "./routes/product.js";
 import fixedExpenseRoutes from "./routes/fixedExpense.js";
 import customerRoutes from "./routes/customer.js";
+import taskRoutes from "./routes/tasks.js"
 import { verificaToken } from "./middlewares/auth.js";
 import { verificaRule } from "./middlewares/rules.js";
 import  supplyRoutes  from "./routes/supply.js";
@@ -53,6 +54,7 @@ app.use("/products", verificaToken, productRoutes);
 app.use("/fixedExpenses", verificaToken, verificaRule("ADM"), fixedExpenseRoutes);
 app.use("/customers", verificaToken, verificaRule("ADM"), customerRoutes);
 app.use("/supply", verificaToken, supplyRoutes);
+app.use("/task", verificaToken, taskRoutes);
 app.use("/supplyPurchases", verificaToken, supplyPurchaseRoutes);
 app.use("/imagens", express.static(path.join(__dirname, "../imagens")));
 

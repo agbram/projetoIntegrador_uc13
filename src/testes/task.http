@@ -1,0 +1,34 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NjMzMDgzOTIsImV4cCI6MTc2MzM0NDM5Mn0.5xnjyKnUldXbml3GWDkToeoyMV4Ts8fDC7AuhNsBWns
+
+GET http://localhost:4000/task/dashboard HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+PATCH http://localhost:4000/task/1/progress HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "completedQuantity": 5
+}
+
+###
+PATCH http://localhost:4000/task/1/status HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "IN_PRODUCTION"
+}
+
+###
+POST http://localhost:4000/task/sync-all-orders HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:4000/task/sync-status HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+

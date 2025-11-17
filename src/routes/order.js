@@ -231,6 +231,7 @@ router.put("/:orderId/items/:itemId", OrderController.updateItem);
  *       404:
  *         description: Pedido não encontrado
  */
-router.put("/:id", verificaRule("CONFEITEIRA"), OrderController.atualizaStatus);
+router.put("/atualiza-status/:id", OrderController.atualizaStatus);
+router.post('/check-production-status', OrderController.checkAllOrdersProductionStatus);
 
 export default router;
