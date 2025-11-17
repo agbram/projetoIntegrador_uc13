@@ -51,12 +51,12 @@ export const ProductController = {
       let products;
 
       if (name || category || isActive) {
-        user = await prisma.product.findMany({
+        products = await prisma.product.findMany({
           where: {
             OR: [
               name ? { name: { contains: name } } : undefined,
               category ? { category: { contains: category } } : undefined,
-              isActive ? { isActive: { contains: isActive } } : undefined,
+              isActive !== undefined ? { isActive: isActive === 'true' } : undefined,            
             ].filter(Boolean),
           },
         });
@@ -101,6 +101,16 @@ export const ProductController = {
 
   async update(req, res, next) {
     try {
+      const id = Number(req.params.id);
+
+      const currentProduct = await prisma.product.findUnique({
+      where: { id }
+    });
+
+    if (!currentProduct) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
 
       let data = {};
 
@@ -113,12 +123,11 @@ export const ProductController = {
       if (req.body.isActive) data.isActive = req.body.isActive;
       if (req.body.fotoData) data.fotoUrl = makeUrlFromImagemBase64(req.body.fotoData);
 
-      const costPrice = data.costPrice !== undefined ? data.costPrice : currentProduct.costPrice;
-      const markupPercent = data.markupPercent !== undefined ? data.markupPercent : currentProduct.markupPercent;
+    const costPrice = data.costPrice !== undefined ? data.costPrice : currentProduct.costPrice;
+    const markupPercent = data.markupPercent !== undefined ? data.markupPercent : currentProduct.markupPercent;
 
       data.salePrice = costPrice * (1 + markupPercent / 100);
 
-      const id = Number(req.params.id);
 
       const p = await prisma.product.update({
         where: { id },
