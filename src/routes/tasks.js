@@ -27,7 +27,7 @@ router.delete('/:id', TaskController.delete);
 // Limpar concluídas
 router.delete('/', TaskController.clearCompleted);
 
-// 🔄 Sincronização inteligente (RECOMENDADA)
+// Sincronização inteligente (RECOMENDADA)
 router.post('/sync-new-orders', TaskController.syncNewOrdersOnly);
 
 //  Status de sincronização
