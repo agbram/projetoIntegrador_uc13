@@ -2,89 +2,116 @@ import prisma from "../prisma.js";
 import { TaskController } from "./tasks.js";
 
 export const OrderController = {
-  async store(req, res, next) {
-    try {
-      const { orderDate, deliveryDate, status, notes, customerId, items, discount } = req.body;
+async store(req, res, next) {
+  try {
+    const { orderDate, deliveryDate, status, notes, customerId, items, discount } = req.body;
 
-      if (!orderDate || !deliveryDate || !customerId) {
-        return res.status(400).json({
-          error: "Data do pedido, data de entrega e cliente são obrigatórios",
-        });
-      }
-
-      const itemsComCalculo = await Promise.all(
-        items.map(async (item) => {
-          const product = await prisma.product.findUnique({
-            where: { id: item.productId },
-          });
-
-          if (!product) {
-            throw new Error(`Produto com ID ${item.productId} não encontrado`);
-          }
-
-          return {
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: product.salePrice,
-            subtotal: product.salePrice * item.quantity,
-          };
-        })
-      );
-
-      // Cálculo do subtotal
-      const subtotal = itemsComCalculo.reduce(
-        (sum, item) => sum + item.subtotal,
-        0
-      );
-
-      // Aplicação do desconto fixo
-      let total = subtotal;
-      if (discount && discount > 0) {
-        total = subtotal - discount;
-        // Garantir que o total não seja negativo
-        total = Math.max(total, 0);
-      }
-
-      const order = await prisma.order.create({
-        data: {
-          customer: { connect: { id: customerId } },
-          orderDate: new Date(orderDate),
-          deliveryDate: new Date(deliveryDate),
-          status: status || "PENDING",
-          notes,
-          subtotal, 
-          discount: discount || 0, 
-          total, 
-          items: {
-            create: itemsComCalculo,
-          },
-          productionSynced: false,
-        },
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-          customer: true,
-        },
+    if (!orderDate || !deliveryDate || !customerId) {
+      return res.status(400).json({
+        error: "Data do pedido, data de entrega e cliente são obrigatórios",
       });
-      
-      console.log("✅ Order created: ", order);
+    }
 
-      try {
-        await TaskController.syncProductionTasks(order.id);
-        console.log("✅ Tarefas de produção sincronizadas para o pedido:", order.id);
-      } catch (syncError) {
-        console.error("Erro ao sincronizar tarefas de produção:", syncError);
+    const itemsComCalculo = await Promise.all(
+      items.map(async (item) => {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+        });
+
+        if (!product) {
+          throw new Error(`Produto com ID ${item.productId} não encontrado`);
+        }
+
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: product.salePrice,
+          subtotal: product.salePrice * item.quantity,
+        };
+      })
+    );
+
+    // Cálculo do subtotal
+    const subtotal = itemsComCalculo.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    );
+
+    // Aplicação do desconto fixo
+    let total = subtotal;
+    if (discount && discount > 0) {
+      total = subtotal - discount;
+      total = Math.max(total, 0);
+    }
+
+    const createBrazilianDate = (dateString) => {
+      if (!dateString) return null;
+      
+      // Se já é um objeto Date, retorna como está
+      if (dateString instanceof Date) return dateString;
+      
+      // Para strings no formato YYYY-MM-DD
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Cria a data no fuso horário de São Paulo
+        const [year, month, day] = dateString.split('-');
+        // Usa UTC mas com o offset brasileiro para evitar confusão
+        return new Date(Date.UTC(
+          parseInt(year),
+          parseInt(month) - 1, // mês é 0-indexed
+          parseInt(day),
+          3, 0, 0 // 03:00 UTC = 00:00 Brasília
+        ));
       }
       
-      res.status(201).json(order);
-    } catch (error) {
-      console.error("Erro ao criar pedido:", error);
-      next(error);
+      // Para outros formatos, tenta parse normal
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? null : date;
+    };
+
+    const order = await prisma.order.create({
+      data: {
+        customer: { connect: { id: customerId } },
+        orderDate: createBrazilianDate(orderDate),
+        deliveryDate: createBrazilianDate(deliveryDate),
+        status: status || "PENDING",
+        notes,
+        subtotal, 
+        discount: discount || 0, 
+        total, 
+        items: {
+          create: itemsComCalculo,
+        },
+        productionSynced: false,
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        customer: true,
+      },
+    });
+    
+    console.log("✅ Order created: ", order);
+    console.log("📅 Datas salvas:", {
+      orderDate: order.orderDate,
+      deliveryDate: order.deliveryDate
+    });
+
+    try {
+      await TaskController.syncProductionTasks(order.id);
+      console.log("✅ Tarefas de produção sincronizadas para o pedido:", order.id);
+    } catch (syncError) {
+      console.error("Erro ao sincronizar tarefas de produção:", syncError);
     }
-  },
+    
+    res.status(201).json(order);
+  } catch (error) {
+    console.error("Erro ao criar pedido:", error);
+    next(error);
+  }
+},
 
   async updateStatusBasedOnProduction(orderId) {
     try {
@@ -183,7 +210,6 @@ export const OrderController = {
     }
   },
 
-// No OrderController, modifique o método atualizaStatus
 async atualizaStatus(req, res, next) {
   try {
     const id = Number(req.params.id);
@@ -226,10 +252,10 @@ async atualizaStatus(req, res, next) {
     if (status === "CANCELLED" && currentOrder.productionSynced) {
       try {
         console.log(`🔄 Pedido ${id} sendo cancelado - removendo da produção...`);
+        // CORREÇÃO: Chamar a função correta do TaskController
         await TaskController.removeOrderFromProduction(id);
       } catch (productionError) {
         console.error(`❌ Erro ao remover pedido ${id} da produção:`, productionError);
-        // Não falha a requisição, apenas loga o erro
       }
     }
 

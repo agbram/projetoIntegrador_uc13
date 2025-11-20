@@ -239,7 +239,7 @@ const TaskController = {
         await tx.order.updateMany({
           where: {
             status: {
-              notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
+              notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', 'CANCELLED']
             }
           },
           data: {
@@ -252,7 +252,7 @@ const TaskController = {
           where: {
             order: {
               status: {
-                notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
+                notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', "CANCELLED"]
               }
             }
           },
@@ -266,7 +266,7 @@ const TaskController = {
       const activeOrders = await prisma.order.findMany({
         where: {
           status: {
-            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
+            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', "CANCELLED"]
           }
         },
         include: {
@@ -511,7 +511,7 @@ async removeOrderFromProduction(orderId) {
       const activeOrders = await prisma.order.findMany({
         where: {
           status: {
-            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
+            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', 'CANCELLED']
           }
         },
         include: {
