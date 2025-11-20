@@ -394,6 +394,116 @@ const TaskController = {
     }
   },
 
+async forceRemoveOrderFromProduction(req, res, next) {
+  try {
+    const { orderId } = req.params;
+    
+    const result = await TaskController.removeOrderFromProduction(parseInt(orderId));
+    
+    res.status(200).json({
+      message: 'Pedido removido da produção com sucesso',
+      ...result
+    });
+  } catch (error) {
+    console.error('❌ Erro ao forçar remoção do pedido da produção:', error);
+    next(error);
+  }
+},
+
+async removeOrderFromProduction(orderId) {
+  try {
+    console.log(`🔄 Removendo pedido ${orderId} da produção...`);
+    
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { 
+        items: { 
+          include: { 
+            product: true 
+          } 
+        } 
+      }
+    });
+
+    if (!order) {
+      console.log(`❌ Pedido ${orderId} não encontrado`);
+      throw new Error('Pedido não encontrado');
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of order.items) {
+        const existingTask = await tx.productionTask.findFirst({
+          where: { productId: item.productId }
+        });
+
+        if (existingTask) {
+          // Subtrai a quantidade do item cancelado da tarefa
+          const newTotalQuantity = Math.max(0, existingTask.totalQuantity - item.quantity);
+          const newPendingQuantity = Math.max(0, existingTask.pendingQuantity - item.quantity);
+          
+          // Ajusta a quantidade concluída se necessário
+          let newCompletedQuantity = existingTask.completedQuantity;
+          if (newCompletedQuantity > newTotalQuantity) {
+            newCompletedQuantity = newTotalQuantity;
+          }
+
+          // Se a nova quantidade total for zero, deleta a tarefa
+          if (newTotalQuantity === 0) {
+            await tx.productionTask.delete({
+              where: { id: existingTask.id }
+            });
+            console.log(`🗑️ Tarefa ${existingTask.id} deletada (quantidade zero)`);
+          } else {
+            // Atualiza a tarefa com as novas quantidades
+            await tx.productionTask.update({
+              where: { id: existingTask.id },
+              data: {
+                totalQuantity: newTotalQuantity,
+                pendingQuantity: newPendingQuantity,
+                completedQuantity: newCompletedQuantity,
+                // Reabre a tarefa se estava completa mas agora tem pendências
+                status: newPendingQuantity > 0 ? 
+                  (existingTask.status === 'COMPLETED' ? 'PENDING' : existingTask.status) 
+                  : existingTask.status
+              }
+            });
+            console.log(`📝 Tarefa ${existingTask.id} atualizada: total=${newTotalQuantity}, pendente=${newPendingQuantity}`);
+          }
+        }
+
+        // Marca o item como não contado na produção
+        await tx.orderItem.updateMany({
+          where: {
+            orderId: orderId,
+            productId: item.productId
+          },
+          data: {
+            productionCounted: false
+          }
+        });
+      }
+
+      // Marca o pedido como não sincronizado
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          productionSynced: false,
+          syncedAt: null
+        }
+      });
+    });
+
+    // Recalcula prioridades após remover o pedido
+    await TaskController.recalculateAllPriorities();
+    
+    console.log(`✅ Pedido ${orderId} removido da produção`);
+    return { success: true, message: 'Pedido removido da produção' };
+  } catch (error) {
+    console.error(`❌ Erro ao remover pedido ${orderId} da produção:`, error);
+    throw new Error(`Falha ao remover pedido da produção: ${error.message}`);
+  }
+},
+
   async syncAllOrders(req, res, next) {
     try {
       console.log("🔄 Iniciando sincronização de todos os pedidos...");
