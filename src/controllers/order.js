@@ -4,8 +4,7 @@ import { TaskController } from "./tasks.js";
 export const OrderController = {
   async store(req, res, next) {
     try {
-      const { orderDate, deliveryDate, status, notes, customerId, items } =
-        req.body;
+      const { orderDate, deliveryDate, status, notes, customerId, items, discount } = req.body;
 
       if (!orderDate || !deliveryDate || !customerId) {
         return res.status(400).json({
@@ -32,10 +31,19 @@ export const OrderController = {
         })
       );
 
-      const total = itemsComCalculo.reduce(
+      // Cálculo do subtotal
+      const subtotal = itemsComCalculo.reduce(
         (sum, item) => sum + item.subtotal,
         0
       );
+
+      // Aplicação do desconto fixo
+      let total = subtotal;
+      if (discount && discount > 0) {
+        total = subtotal - discount;
+        // Garantir que o total não seja negativo
+        total = Math.max(total, 0);
+      }
 
       const order = await prisma.order.create({
         data: {
@@ -44,7 +52,9 @@ export const OrderController = {
           deliveryDate: new Date(deliveryDate),
           status: status || "PENDING",
           notes,
-          total,
+          subtotal, 
+          discount: discount || 0, 
+          total, 
           items: {
             create: itemsComCalculo,
           },
@@ -62,7 +72,6 @@ export const OrderController = {
       
       console.log("✅ Order created: ", order);
 
-      // ✅ Sincronizar tarefas de produção
       try {
         await TaskController.syncProductionTasks(order.id);
         console.log("✅ Tarefas de produção sincronizadas para o pedido:", order.id);
@@ -110,7 +119,7 @@ export const OrderController = {
           where: { id: orderId },
           data: { status: 'PRODUCTION_COMPLETE' }
         });
-        console.log(`✅ Pedido ${orderId} marcado como produção concluída`);
+        console.log(`Pedido ${orderId} marcado como produção concluída`);
       }
 
     } catch (error) {
@@ -174,46 +183,76 @@ export const OrderController = {
     }
   },
 
-  async atualizaStatus(req, res, next) {
-    try {
-      const id = Number(req.params.id);
-      const { status } = req.body;
+// No OrderController, modifique o método atualizaStatus
+async atualizaStatus(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body;
 
-      const validStatuses = [
-        "PENDING", 
-        "IN_PROGRESS", 
-        "IN_PRODUCTION", 
-        "READY_FOR_DELIVERY",
-        "DELIVERED", 
-        "CANCELLED",
-        "PRODUCTION_COMPLETE" 
-      ];
+    const validStatuses = [
+      "PENDING", 
+      "IN_PROGRESS", 
+      "IN_PRODUCTION", 
+      "READY_FOR_DELIVERY",
+      "DELIVERED", 
+      "CANCELLED",
+      "PRODUCTION_COMPLETE" 
+    ];
 
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ 
-          error: `Status inválido. Use: ${validStatuses.join(', ')}` 
-        });
-      }
-
-      const order = await prisma.order.update({
-        where: { id },
-        data: { status },
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-          customer: true,
-        },
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        error: `Status inválido. Use: ${validStatuses.join(', ')}` 
       });
-
-      res.status(200).json(order);
-    } catch (error) {
-      console.error("❌ Erro ao atualizar status do pedido!", error);
-      next(error);
     }
-  },
+
+    // Busca o pedido atual para verificar o status anterior
+    const currentOrder = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        customer: true,
+      },
+    });
+
+    if (!currentOrder) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    // Se o pedido está sendo cancelado E estava sincronizado com produção
+    if (status === "CANCELLED" && currentOrder.productionSynced) {
+      try {
+        console.log(`🔄 Pedido ${id} sendo cancelado - removendo da produção...`);
+        await TaskController.removeOrderFromProduction(id);
+      } catch (productionError) {
+        console.error(`❌ Erro ao remover pedido ${id} da produção:`, productionError);
+        // Não falha a requisição, apenas loga o erro
+      }
+    }
+
+    // Atualiza o status do pedido
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        customer: true,
+      },
+    });
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("❌ Erro ao atualizar status do pedido!", error);
+    next(error);
+  }
+},
 
   async index(req, res, next) {
     try {
@@ -237,7 +276,7 @@ export const OrderController = {
               include: {
                 product: {
                   include: {
-                    productionTasks: true, // ✅ CORRETO: minúsculo plural
+                    productionTasks: true, 
                   }
                 }
               },
@@ -252,7 +291,7 @@ export const OrderController = {
               include: {
                 product: {
                   include: {
-                    productionTasks: true // ✅ CORRETO: minúsculo plural
+                    productionTasks: true 
                   }
                 }
               },
@@ -264,12 +303,11 @@ export const OrderController = {
 
       const ordersWithProductionProgress = orders.map(order => {
         const itemsWithProgress = order.items.map(item => {
-          const productionTasks = item.product.productionTasks; // ✅ CORRETO: plural
+          const productionTasks = item.product.productionTasks; 
           let producedQuantity = 0;
           let isFullyProduced = false;
           let productionProgress = 0;
 
-          // ✅ Como é um array, pegamos a primeira task (ou fazemos lógica mais complexa se necessário)
           const productionTask = productionTasks && productionTasks.length > 0 ? productionTasks[0] : null;
           
           if (productionTask) {
@@ -311,7 +349,7 @@ export const OrderController = {
             include: {
               product: {
                 include: {
-                  productionTasks: true, // ✅ CORRETO: minúsculo plural
+                  productionTasks: true, 
                 }
               }
             },
@@ -325,7 +363,7 @@ export const OrderController = {
       }
 
       const itemsWithProgress = order.items.map(item => {
-        const productionTasks = item.product.productionTasks; // ✅ CORRETO: plural
+        const productionTasks = item.product.productionTasks; 
         const productionTask = productionTasks && productionTasks.length > 0 ? productionTasks[0] : null;
         
         let producedQuantity = 0;

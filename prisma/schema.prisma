@@ -104,6 +104,8 @@ model Order {
   deliveryDate DateTime?
   status       OrderStatus @default(PENDING)
   notes        String?
+  subtotal     Float?      
+  discount     Float?      @default(0)
   total        Float?      @default(0)
   productionSynced Boolean @default(false)
   syncedAt     DateTime?
