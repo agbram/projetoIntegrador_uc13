@@ -40,21 +40,28 @@ export const CustomerController = {
   // Listar todos os clientes ou filtrar por nome
 async index(req, res, next) {
   try {
-    const { isActive } = req.query;
-
-    let filter = {};
-    if (isActive == undefined) {
-      filter.isActive = isActive !== "true";
-    }
-
     const customers = await prisma.customer.findMany({
-      where: filter,
+      include: {
+        _count: {
+          select: {
+            orders: true
+          }
+        }
+      },
+      orderBy: {
+        name: 'asc'
+      }
     });
 
-    res.status(200).json(customers);
-  } catch (err) {
-    console.error(err);
-    next(err);
+    const customersWithOrderCount = customers.map(customer => ({
+      ...customer,
+      ordersCount: customer._count.orders
+    }));
+
+    res.status(200).json(customersWithOrderCount);
+  } catch (error) {
+    console.error("Erro ao buscar clientes:", error);
+    next(error);
   }
 },
 

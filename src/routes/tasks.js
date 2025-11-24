@@ -27,13 +27,18 @@ router.delete('/:id', TaskController.delete);
 // Limpar concluídas
 router.delete('/', TaskController.clearCompleted);
 
-// 🔄 Sincronização inteligente (RECOMENDADA)
+router.delete('/order/:orderId', TaskController.forceRemoveOrderFromProduction);
+
+// Nas rotas de tasks, adicione:
+router.post('/:orderId/remove-from-production', TaskController.removeOrderFromProduction);
+
+// Sincronização inteligente (RECOMENDADA)
 router.post('/sync-new-orders', TaskController.syncNewOrdersOnly);
 
-// 📊 Status de sincronização
+//  Status de sincronização
 router.get('/sync-status', TaskController.getSyncStatus);
 
-// 🧹 Sincronização completa (APENAS PARA CASOS ESPECÍFICOS)
+//  Sincronização completa (APENAS PARA CASOS ESPECÍFICOS)
 router.post('/sync-all-orders-clean', TaskController.syncAllOrdersClean);
 
 export default router;

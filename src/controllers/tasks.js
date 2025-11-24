@@ -1,309 +1,306 @@
 import prisma from "../prisma.js";
 
 const TaskController = {
-async syncProductionTasks(orderId) {
-  try {
-    console.log(`🔄 Sincronizando tarefas para pedido ${orderId}...`);
-    
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: { 
-        items: { 
-          include: { 
-            product: true 
-          } 
-        } 
-      }
-    });
-
-    if (!order) {
-      console.log(` Pedido ${orderId} não encontrado`);
-      throw new Error('Pedido não encontrado');
-    }
-
-        const finalStatuses = ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE'];
-    if (finalStatuses.includes(order.status)) {
-      console.log(` Pedido ${orderId} já está em estado final (${order.status}) - Ignorando sincronização`);
-      return { success: true, message: 'Pedido em estado final - não sincronizado' };
-    }
-    if (order.productionSynced) {
-      console.log(` Pedido ${orderId} já foi sincronizado anteriormente`);
-      return { success: true, message: 'Pedido já sincronizado' };
-    }
-
-    console.log(`📦 Pedido ${orderId} tem ${order.items.length} itens`);
-
-    if (order.productionSynced) {
-      console.log(` Pedido ${orderId} já foi sincronizado anteriormente`);
-      return { success: true, message: 'Pedido já sincronizado' };
-    }
-
-    console.log(`Pedido ${orderId} tem ${order.items.length} itens`);
-
-    await prisma.$transaction(async (tx) => {
-      for (const item of order.items) {
-        const existingTask = await tx.productionTask.findUnique({
-          where: { productId: item.productId }
-        });
-        
-        if (existingTask) {
-          const shouldReopen = existingTask.status === 'COMPLETED' || existingTask.status === 'CANCELLED';
-          
-          const newTotalQuantity = existingTask.totalQuantity + item.quantity;
-          const newPendingQuantity = existingTask.pendingQuantity + item.quantity;
-          
-          
-          const updateData = {
-            totalQuantity: newTotalQuantity,
-            pendingQuantity: newPendingQuantity,
-            dueDate: await TaskController.calculateDueDate(item.productId),
-            ...(shouldReopen && {
-              status: 'PENDING',
-             
-            })
-          };
-
-          await tx.productionTask.update({
-            where: { productId: item.productId },
-            data: updateData
-          });
-
-          console.log(`📝 Task existente atualizada para produto ${item.productId}: +${item.quantity} unidades`);
-        } else {
-          await tx.productionTask.create({
-            data: {
-              productId: item.productId,
-              totalQuantity: item.quantity,
-              pendingQuantity: item.quantity,
-              completedQuantity: 0,
-              dueDate: order.deliveryDate,
-              status: 'PENDING'
-            }
-          });
-          console.log(` Nova task criada para produto ${item.productId}: ${item.quantity} unidades`);
-        }
-
-        await tx.orderItem.updateMany({
-          where: {
-            orderId: orderId,
-            productId: item.productId
-          },
-          data: {
-            productionCounted: true
-          }
-        });
-      }
-
-      await tx.order.update({
+  async syncProductionTasks(orderId) {
+    try {
+      console.log(`🔄 Sincronizando tarefas para pedido ${orderId}...`);
+      
+      const order = await prisma.order.findUnique({
         where: { id: orderId },
-        data: {
-          productionSynced: true,
-          syncedAt: new Date()
+        include: { 
+          items: { 
+            include: { 
+              product: true 
+            } 
+          } 
         }
       });
-    });
 
-    await TaskController.recalculateAllPriorities();
-    
-    console.log(` Sincronização concluída para pedido ${orderId}`);
-    return { success: true, message: 'Tarefas de produção sincronizadas' };
-  } catch (error) {
-    console.error(` Erro ao sincronizar pedido ${orderId}:`, error);
-    throw error;
-  }
-},
-
-// ✅ NOVO MÉTODO: Verificar status de sincronização
-async getSyncStatus(req, res, next) {
-  try {
-    const totalOrders = await prisma.order.count();
-    const syncedOrders = await prisma.order.count({
-      where: { productionSynced: true }
-    });
-    
-    const ordersByStatus = await prisma.order.groupBy({
-      by: ['status'],
-      _count: {
-        id: true
+      if (!order) {
+        console.log(` Pedido ${orderId} não encontrado`);
+        throw new Error('Pedido não encontrado');
       }
-    });
 
-    const activeOrders = await prisma.order.count({
-      where: {
-        status: {
-          notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
-        }
+      const finalStatuses = ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE'];
+      if (finalStatuses.includes(order.status)) {
+        console.log(` Pedido ${orderId} já está em estado final (${order.status}) - Ignorando sincronização`);
+        return { success: true, message: 'Pedido em estado final - não sincronizado' };
       }
-    });
-
-    res.status(200).json({
-      syncStatus: {
-        totalOrders,
-        syncedOrders,
-        notSynced: totalOrders - syncedOrders,
-        activeOrders,
-        completedOrders: totalOrders - activeOrders
-      },
-      statusBreakdown: ordersByStatus
-    });
-  } catch (error) {
-    console.error('❌ Erro ao buscar status de sincronização:', error);
-    next(error);
-  }
-},
-
-async updateOrderStatusOnProductionProgress(taskId) {
-  try {
-    const task = await prisma.productionTask.findUnique({
-      where: { id: taskId },
-      include: {
-        product: true
+      if (order.productionSynced) {
+        console.log(` Pedido ${orderId} já foi sincronizado anteriormente`);
+        return { success: true, message: 'Pedido já sincronizado' };
       }
-    });
 
-    if (!task) return;
+      console.log(`Pedido ${orderId} tem ${order.items.length} itens`);
 
-    console.log(` Verificando pedidos para produção do produto ${task.product.name}...`);
-
-    // Buscar todos os pedidos que contêm este produto
-    const ordersWithThisProduct = await prisma.order.findMany({
-      where: {
-        items: {
-          some: {
-            productId: task.productId,
-            productionCounted: true
-          }
-        },
-        status: {
-          in: ['PENDING', 'IN_PROGRESS'] // Apenas pedidos que podem entrar em produção
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      }
-    });
-
-    console.log(` Encontrados ${ordersWithThisProduct.length} pedidos com o produto`);
-
-    for (const order of ordersWithThisProduct) {
-      let hasProductionStarted = false;
-      let allItemsProduced = true;
-
-      // Verificar o status de produção de cada item do pedido
-      for (const item of order.items) {
-        const itemTask = await prisma.productionTask.findUnique({
-          where: { productId: item.productId }
-        });
-        
-        if (itemTask) {
-          // Se pelo menos um item está em produção
-          if (itemTask.status === 'IN_PRODUCTION' || 
-              (itemTask.completedQuantity > 0 && itemTask.completedQuantity < itemTask.totalQuantity)) {
-            hasProductionStarted = true;
-          }
+      await prisma.$transaction(async (tx) => {
+        for (const item of order.items) {
+          const existingTask = await tx.productionTask.findFirst({
+            where: { productId: item.productId }
+          })
           
-          // Se algum item não foi totalmente produzido
-          if (itemTask.completedQuantity < item.quantity) {
-            allItemsProduced = false;
+          if (existingTask) {
+            const shouldReopen = existingTask.status === 'COMPLETED' || existingTask.status === 'CANCELLED';
+            
+            const newTotalQuantity = existingTask.totalQuantity + item.quantity;
+            const newPendingQuantity = existingTask.pendingQuantity + item.quantity;
+            
+            const updateData = {
+              totalQuantity: newTotalQuantity,
+              pendingQuantity: newPendingQuantity,
+              dueDate: await TaskController.calculateDueDate(item.productId),
+              ...(shouldReopen && {
+                status: 'PENDING',
+              })
+            };
+
+            await tx.productionTask.update({
+              where: { id: existingTask.id }, 
+              data: updateData
+            });
+
+            console.log(`📝 Task existente atualizada para produto ${item.productId}: +${item.quantity} unidades`);
+          } else {
+            if (item.quantity > 0) {
+              await tx.productionTask.create({
+                data: {
+                  productId: item.productId,
+                  totalQuantity: item.quantity,
+                  pendingQuantity: item.quantity,
+                  completedQuantity: 0,
+                  dueDate: order.deliveryDate,
+                  status: 'PENDING'
+                }
+              });
+              console.log(` Nova task criada para produto ${item.productId}: ${item.quantity} unidades`);
+            } else {
+              console.log(` Ignorando produto ${item.productId} - quantidade zero`);
+            }
           }
-        } else {
-          // Se não há tarefa para o item, não está produzido
-          allItemsProduced = false;
+
+          await tx.orderItem.updateMany({
+            where: {
+              orderId: orderId,
+              productId: item.productId
+            },
+            data: {
+              productionCounted: true
+            }
+          });
         }
-      }
 
-      if (hasProductionStarted && order.status !== 'IN_PRODUCTION' && !allItemsProduced) {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: 'IN_PRODUCTION' }
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            productionSynced: true,
+            syncedAt: new Date()
+          }
         });
-        console.log(`✅ Pedido ${order.id} marcado como EM PRODUÇÃO`);
-      }
+      });
+
+      await TaskController.recalculateAllPriorities();
+      
+      console.log(` Sincronização concluída para pedido ${orderId}`);
+      return { success: true, message: 'Tarefas de produção sincronizadas' };
+    } catch (error) {
+      console.error(` Erro ao sincronizar pedido ${orderId}:`, error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        stack: error.stack,
+        orderId: orderId
+      });
+      throw new Error(`Falha na sincronização do pedido ${orderId}: ${error.message}`);
     }
+  },
 
-  } catch (error) {
-    console.error(`❌ Erro ao atualizar status do pedido para produção:`, error);
-  }
-},
+  async getSyncStatus(req, res, next) {
+    try {
+      const totalOrders = await prisma.order.count();
+      const syncedOrders = await prisma.order.count({
+        where: { productionSynced: true }
+      });
+      
+      const ordersByStatus = await prisma.order.groupBy({
+        by: ['status'],
+        _count: {
+          id: true
+        }
+      });
 
-async syncAllOrdersClean(req, res, next) {
-  try {
-    console.log("🔄 Iniciando sincronização LIMPA de todos os pedidos...");
-    
-    await prisma.$transaction(async (tx) => {
-      await tx.productionTask.deleteMany({});
-      console.log("✅ Tasks antigas removidas");
-
-      await tx.order.updateMany({
+      const activeOrders = await prisma.order.count({
         where: {
           status: {
             notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
           }
-        },
-        data: {
-          productionSynced: false,
-          syncedAt: null
         }
       });
 
-      await tx.orderItem.updateMany({
+      res.status(200).json({
+        syncStatus: {
+          totalOrders,
+          syncedOrders,
+          notSynced: totalOrders - syncedOrders,
+          activeOrders,
+          completedOrders: totalOrders - activeOrders
+        },
+        statusBreakdown: ordersByStatus
+      });
+    } catch (error) {
+      console.error('❌ Erro ao buscar status de sincronização:', error);
+      next(error);
+    }
+  },
+
+  async updateOrderStatusOnProductionProgress(taskId) {
+    try {
+      const task = await prisma.productionTask.findUnique({
+        where: { id: taskId },
+        include: {
+          product: true
+        }
+      });
+
+      if (!task) return;
+
+      console.log(` Verificando pedidos para produção do produto ${task.product.name}...`);
+
+      // Buscar todos os pedidos que contêm este produto
+      const ordersWithThisProduct = await prisma.order.findMany({
         where: {
-          order: {
-            status: {
-              notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
+          items: {
+            some: {
+              productId: task.productId,
+              productionCounted: true
+            }
+          },
+          status: {
+            in: ['PENDING', 'IN_PROGRESS', 'IN_PRODUCTION']
+          }
+        },
+        include: {
+          items: {
+            include: {
+              product: true
             }
           }
-        },
-        data: {
-          productionCounted: false
         }
       });
-      console.log("✅ Campos de sincronização resetados APENAS para pedidos ativos");
-    });
 
-    const activeOrders = await prisma.order.findMany({
-      where: {
-        status: {
-          notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
+      console.log(` Encontrados ${ordersWithThisProduct.length} pedidos com o produto`);
+
+      for (const order of ordersWithThisProduct) {
+        let hasProductionStarted = false;
+        let allItemsProduced = true;
+
+        // Verificar o status de produção de cada item do pedido
+        for (const item of order.items) {
+          const itemTask = await prisma.productionTask.findFirst({
+            where: { productId: item.productId }
+          });
+          
+          if (itemTask) {
+            // Se pelo menos um item está em produção
+            if (itemTask.status === 'IN_PRODUCTION' || 
+                (itemTask.completedQuantity > 0 && itemTask.completedQuantity < itemTask.totalQuantity)) {
+              hasProductionStarted = true;
+            }
+            
+            // Se algum item não foi totalmente produzido
+            if (itemTask.completedQuantity < item.quantity) {
+              allItemsProduced = false;
+            }
+          } else {
+            // Se não há tarefa para o item, não está produzido
+            allItemsProduced = false;
           }
         }
-      }
-    });
 
-    console.log(`📦 Encontrados ${activeOrders.length} pedidos ATIVOS para sincronizar`);
-
-    for (const order of activeOrders) {
-      try {
-        await TaskController.syncProductionTasks(order.id);
-        console.log(`✅ Pedido ${order.id} sincronizado`);
-      } catch (orderError) {
-        console.error(`❌ Erro ao sincronizar pedido ${order.id}:`, orderError);
+        if (hasProductionStarted && order.status !== 'IN_PRODUCTION' && !allItemsProduced) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { status: 'IN_PRODUCTION' }
+          });
+          console.log(`✅ Pedido ${order.id} marcado como EM PRODUÇÃO`);
+        }
       }
+    } catch (error) {
+      console.error(`❌ Erro ao atualizar status do pedido para produção:`, error);
     }
+  },
 
-    res.status(200).json({
-      message: "Sincronização limpa concluída - Apenas pedidos ativos processados",
-      summary: {
-        totalActiveOrders: activeOrders.length,
-        ignoredCompletedOrders: "Pedidos READY_FOR_DELIVERY/DELIVERED foram mantidos"
+  async syncAllOrdersClean(req, res, next) {
+    try {
+      console.log("🔄 Iniciando sincronização LIMPA de todos os pedidos...");
+      
+      await prisma.$transaction(async (tx) => {
+        await tx.productionTask.deleteMany({});
+        console.log("✅ Tasks antigas removidas");
+
+        await tx.order.updateMany({
+          where: {
+            status: {
+              notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', 'CANCELLED']
+            }
+          },
+          data: {
+            productionSynced: false,
+            syncedAt: null
+          }
+        });
+
+        await tx.orderItem.updateMany({
+          where: {
+            order: {
+              status: {
+                notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', "CANCELLED"]
+              }
+            }
+          },
+          data: {
+            productionCounted: false
+          }
+        });
+        console.log("✅ Campos de sincronização resetados APENAS para pedidos ativos");
+      });
+
+      const activeOrders = await prisma.order.findMany({
+        where: {
+          status: {
+            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', "CANCELLED"]
+          }
+        },
+        include: {
+          items: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+
+      console.log(`📦 Encontrados ${activeOrders.length} pedidos ATIVOS para sincronizar`);
+
+      for (const order of activeOrders) {
+        try {
+          await TaskController.syncProductionTasks(order.id);
+          console.log(`✅ Pedido ${order.id} sincronizado`);
+        } catch (orderError) {
+          console.error(`❌ Erro ao sincronizar pedido ${order.id}:`, orderError);
+        }
       }
-    });
 
-  } catch (error) {
-    console.error('❌ Erro na sincronização limpa:', error);
-    next(error);
-  }
-},
+      res.status(200).json({
+        message: "Sincronização limpa concluída - Apenas pedidos ativos processados",
+        summary: {
+          totalActiveOrders: activeOrders.length,
+          ignoredCompletedOrders: "Pedidos READY_FOR_DELIVERY/DELIVERED foram mantidos"
+        }
+      });
+    } catch (error) {
+      console.error('❌ Erro na sincronização limpa:', error);
+      next(error);
+    }
+  },
 
   // Recalcular prioridades de todas as tasks
   async recalculateAllPriorities() {
@@ -325,18 +322,18 @@ async syncAllOrdersClean(req, res, next) {
         return;
       }
 
-      // Extrai todas as quantidades para calcular percentis
-      const allQuantities = allTasks.map(task => task.pendingQuantity);
-      
-      // Atualiza prioridade para cada task
-      for (const task of allTasks) {
-        const priority = TaskController.calculatePriority(task.pendingQuantity, allQuantities);
+      await prisma.$transaction(async (tx) => {
+        const allQuantities = allTasks.map(task => task.pendingQuantity);
+        
+        for (const task of allTasks) {
+          const priority = TaskController.calculatePriority(task.pendingQuantity, allQuantities);
 
-        await prisma.productionTask.update({
-          where: { id: task.id },
-          data: { priority }
-        });
-      }
+          await tx.productionTask.update({
+            where: { id: task.id },
+            data: { priority }
+          });
+        }
+      });
 
       console.log(`✅ Prioridades recalculadas para ${allTasks.length} tarefas`);
       return { success: true, updated: allTasks.length };
@@ -376,6 +373,9 @@ async syncAllOrdersClean(req, res, next) {
           },
           status: {
             in: ['PENDING', 'IN_PROGRESS',"IN_PRODUCTION", "READY_FOR_DELIVERY"]
+          },
+          deliveryDate: {
+            not: null
           }
         },
         select: {
@@ -387,70 +387,180 @@ async syncAllOrdersClean(req, res, next) {
         take: 1
       });
 
-      return ordersWithProduct[0]?.deliveryDate || null;
+      return ordersWithProduct[0]?.deliveryDate || new Date();
     } catch (error) {
       console.error(' Erro ao calcular dueDate:', error);
-      return null;
+      return new Date();
     }
   },
 
-async syncAllOrders(req, res, next) {
+async forceRemoveOrderFromProduction(req, res, next) {
   try {
-    console.log("🔄 Iniciando sincronização de todos os pedidos...");
+    const { orderId } = req.params;
     
-    const activeOrders = await prisma.order.findMany({
-      where: {
-        status: {
-          notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE']
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      }
-    });
-
-    console.log(`📦 Encontrados ${activeOrders.length} pedidos ATIVOS para sincronizar`);
-
-    let totalTasksCreated = 0;
-    let totalTasksUpdated = 0;
-
-    for (const order of activeOrders) {
-      try {
-        await TaskController.syncProductionTasks(order.id);
-        totalTasksCreated += order.items.length;
-        totalTasksUpdated++;
-        console.log(`✅ Pedido ${order.id} sincronizado`);
-      } catch (orderError) {
-        console.error(`❌ Erro ao sincronizar pedido ${order.id}:`, orderError);
-      }
-    }
-
-    await TaskController.recalculateAllPriorities();
-
+    const result = await TaskController.removeOrderFromProduction(parseInt(orderId));
+    
     res.status(200).json({
-      message: "Sincronização concluída - Apenas pedidos ativos processados",
-      summary: {
-        totalActiveOrders: activeOrders.length,
-        ordersProcessed: totalTasksUpdated,
-        totalTasks: totalTasksCreated,
-        note: "Pedidos READY_FOR_DELIVERY/DELIVERED foram ignorados"
-      }
+      message: 'Pedido removido da produção com sucesso',
+      ...result
     });
-
   } catch (error) {
-    console.error('❌ Erro na sincronização geral:', error);
+    console.error('❌ Erro ao forçar remoção do pedido da produção:', error);
     next(error);
   }
 },
 
-  // Listar todas as tarefas de produção
+async removeOrderFromProduction(orderId) {
+  try {
+    console.log(`🔄 Removendo pedido ${orderId} da produção...`);
+    
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { 
+        items: { 
+          include: { 
+            product: true 
+          } 
+        } 
+      }
+    });
+
+    if (!order) {
+      console.log(`❌ Pedido ${orderId} não encontrado`);
+      throw new Error('Pedido não encontrado');
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of order.items) {
+        const existingTask = await tx.productionTask.findFirst({
+          where: { productId: item.productId }
+        });
+
+        if (existingTask) {
+          // Subtrai a quantidade do item cancelado da tarefa
+          const newTotalQuantity = Math.max(0, existingTask.totalQuantity - item.quantity);
+          const newPendingQuantity = Math.max(0, existingTask.pendingQuantity - item.quantity);
+          
+          // Ajusta a quantidade concluída se necessário
+          let newCompletedQuantity = existingTask.completedQuantity;
+          if (newCompletedQuantity > newTotalQuantity) {
+            newCompletedQuantity = newTotalQuantity;
+          }
+
+          // Se a nova quantidade total for zero, deleta a tarefa
+          if (newTotalQuantity === 0) {
+            await tx.productionTask.delete({
+              where: { id: existingTask.id }
+            });
+            console.log(`🗑️ Tarefa ${existingTask.id} deletada (quantidade zero)`);
+          } else {
+            // Atualiza a tarefa com as novas quantidades
+            await tx.productionTask.update({
+              where: { id: existingTask.id },
+              data: {
+                totalQuantity: newTotalQuantity,
+                pendingQuantity: newPendingQuantity,
+                completedQuantity: newCompletedQuantity,
+                // Reabre a tarefa se estava completa mas agora tem pendências
+                status: newPendingQuantity > 0 ? 
+                  (existingTask.status === 'COMPLETED' ? 'PENDING' : existingTask.status) 
+                  : existingTask.status
+              }
+            });
+            console.log(`📝 Tarefa ${existingTask.id} atualizada: total=${newTotalQuantity}, pendente=${newPendingQuantity}`);
+          }
+        }
+
+        // Marca o item como não contado na produção
+        await tx.orderItem.updateMany({
+          where: {
+            orderId: orderId,
+            productId: item.productId
+          },
+          data: {
+            productionCounted: false
+          }
+        });
+      }
+
+      // Marca o pedido como não sincronizado
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          productionSynced: false,
+          syncedAt: null
+        }
+      });
+    });
+
+    // Recalcula prioridades após remover o pedido
+    await TaskController.recalculateAllPriorities();
+    
+    console.log(`✅ Pedido ${orderId} removido da produção`);
+    return { success: true, message: 'Pedido removido da produção' };
+  } catch (error) {
+    console.error(`❌ Erro ao remover pedido ${orderId} da produção:`, error);
+    throw new Error(`Falha ao remover pedido da produção: ${error.message}`);
+  }
+},
+
+  async syncAllOrders(req, res, next) {
+    try {
+      console.log("🔄 Iniciando sincronização de todos os pedidos...");
+      
+      const activeOrders = await prisma.order.findMany({
+        where: {
+          status: {
+            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'PRODUCTION_COMPLETE', 'CANCELLED']
+          }
+        },
+        include: {
+          items: {
+            include: {
+              product: true
+            }
+          }
+        }
+      });
+
+      console.log(`📦 Encontrados ${activeOrders.length} pedidos ATIVOS para sincronizar`);
+
+      let totalTasksCreated = 0;
+      let totalTasksUpdated = 0;
+
+      for (const order of activeOrders) {
+        try {
+          await TaskController.syncProductionTasks(order.id);
+          totalTasksCreated += order.items.length;
+          totalTasksUpdated++;
+          console.log(`✅ Pedido ${order.id} sincronizado`);
+        } catch (orderError) {
+          console.error(`❌ Erro ao sincronizar pedido ${order.id}:`, orderError);
+        }
+      }
+
+      await TaskController.recalculateAllPriorities();
+
+      res.status(200).json({
+        message: "Sincronização concluída - Apenas pedidos ativos processados",
+        summary: {
+          totalActiveOrders: activeOrders.length,
+          ordersProcessed: totalTasksUpdated,
+          totalTasks: totalTasksCreated,
+          note: "Pedidos READY_FOR_DELIVERY/DELIVERED foram ignorados"
+        }
+      });
+    } catch (error) {
+      console.error('❌ Erro na sincronização geral:', error);
+      next(error);
+    }
+  },
+
+  // Listar todas as tarefas de produção - ✅ CORRIGIDO
   async index(req, res, next) {
     try {
-      const { status, priority } = req.query;
+      const { status, priority, page = 1, limit = 50 } = req.query;
+      const skip = (page - 1) * limit;
 
       let where = {};
       
@@ -470,107 +580,118 @@ async syncAllOrders(req, res, next) {
         ];
       }
 
-      const tasks = await prisma.productionTask.findMany({
-        where,
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
-              category: true
+      const [tasks, totalCount] = await Promise.all([
+        prisma.productionTask.findMany({
+          where,
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true
+              }
             }
-          }
-        },
-        orderBy: [
-          { priority: 'desc' },
-          { pendingQuantity: 'desc' },
-          { dueDate: 'asc' }
-        ]
-      });
+          },
+          orderBy: [
+            { priority: 'desc' },
+            { pendingQuantity: 'desc' },
+            { dueDate: 'asc' }
+          ],
+          skip,
+          take: parseInt(limit)
+        }),
+        prisma.productionTask.count({ where })
+      ]);
 
-      res.status(200).json(tasks);
+      // ✅ CORREÇÃO: Estrutura correta do try/catch
+      res.status(200).json({
+        tasks,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit)
+        }
+      });
     } catch (error) {
       console.error('❌ Erro ao buscar tarefas:', error);
       next(error);
     }
   },
 
-async updateOrderStatusOnTaskCompletion(taskId) {
-  try {
-    const task = await prisma.productionTask.findUnique({
-      where: { id: taskId },
-      include: {
-        product: true
+  async updateOrderStatusOnTaskCompletion(taskId) {
+    try {
+      const task = await prisma.productionTask.findUnique({
+        where: { id: taskId },
+        include: {
+          product: true
+        }
+      });
+
+      if (!task || task.status !== 'COMPLETED') {
+        return;
       }
-    });
 
-    if (!task || task.status !== 'COMPLETED') {
-      return;
-    }
+      console.log(`🔄 Verificando pedidos para o produto ${task.product.name}...`);
 
-    console.log(`🔄 Verificando pedidos para o produto ${task.product.name}...`);
-
-    // Buscar todos os pedidos que contêm este produto e não estão concluídos
-    const ordersWithThisProduct = await prisma.order.findMany({
-      where: {
-        items: {
-          some: {
-            productId: task.productId,
-            productionCounted: true
+      // Buscar todos os pedidos que contêm este produto e não estão concluídos
+      const ordersWithThisProduct = await prisma.order.findMany({
+        where: {
+          items: {
+            some: {
+              productId: task.productId,
+              productionCounted: true
+            }
+          },
+          status: {
+            not: 'DELIVERED'
           }
         },
-        status: {
-          not: 'DELIVERED'
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
+        include: {
+          items: {
+            include: {
+              product: true
+            }
           }
         }
-      }
-    });
+      });
 
-    console.log(`📦 Encontrados ${ordersWithThisProduct.length} pedidos com o produto`);
+      console.log(`📦 Encontrados ${ordersWithThisProduct.length} pedidos com o produto`);
 
-    for (const order of ordersWithThisProduct) {
-      let allItemsProduced = true;
+      for (const order of ordersWithThisProduct) {
+        let allItemsProduced = true;
 
-      // Verificar se TODOS os itens do pedido foram produzidos
-      for (const item of order.items) {
-        const itemTask = await prisma.productionTask.findUnique({
-          where: { productId: item.productId }
-        });
+        // Verificar se TODOS os itens do pedido foram produzidos
+        for (const item of order.items) {
+          const itemTask = await prisma.productionTask.findFirst({
+            where: { productId: item.productId }
+          });
 
-        // Se não há tarefa OU se a tarefa não está concluída OU quantidade insuficiente
-        if (!itemTask || 
-            itemTask.status !== 'COMPLETED' || 
-            itemTask.completedQuantity < item.quantity) {
-          allItemsProduced = false;
-          break;
+          // Se não há tarefa OU se a tarefa não está concluída OU quantidade insuficiente
+          if (!itemTask || 
+              itemTask.status !== 'COMPLETED' || 
+              itemTask.completedQuantity < item.quantity) {
+            allItemsProduced = false;
+            break;
+          }
+        }
+
+        // Se todos os itens foram produzidos, atualizar status do pedido
+        if (allItemsProduced && order.status !== 'READY_FOR_DELIVERY') {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { 
+              status: 'READY_FOR_DELIVERY',
+            }
+          });
+          console.log(`✅ Pedido ${order.id} marcado como PRONTO PARA ENTREGA`);
         }
       }
-
-      // Se todos os itens foram produzidos, atualizar status do pedido
-      if (allItemsProduced && order.status !== 'READY_FOR_DELIVERY') {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { 
-            status: 'READY_FOR_DELIVERY',
-            // ✅ Você pode usar 'PRODUCTION_COMPLETE' se preferir
-            // status: 'PRODUCTION_COMPLETE',
-          }
-        });
-        console.log(`✅ Pedido ${order.id} marcado como PRONTO PARA ENTREGA`);
-      }
+    } catch (error) {
+      console.error(`Erro ao atualizar status do pedido:`, error);
     }
-
-  } catch (error) {
-    console.error(`Erro ao atualizar status do pedido:`, error);
-  }
-},
+  },
 
   // Buscar dashboard de produção (resumo + tarefas)
   async dashboard(req, res, next) {
@@ -658,7 +779,7 @@ async updateOrderStatusOnTaskCompletion(taskId) {
       }
 
       const newStatus = newPending === 0 ? 'COMPLETED' : 
-                     task.status === 'PENDING' ? 'IN_PRODUCTION' : task.status;
+                       task.status === 'PENDING' ? 'IN_PRODUCTION' : task.status;
 
       const updatedTask = await prisma.productionTask.update({
         where: { id },
@@ -678,15 +799,11 @@ async updateOrderStatusOnTaskCompletion(taskId) {
         }
       });
 
-          if (newStatus === 'COMPLETED') {
-      await TaskController.updateOrderStatusOnTaskCompletion(id);
-    }
-
-        if (newStatus === 'COMPLETED') {
-      await TaskController.updateOrderStatusOnTaskCompletion(id);
-    } else {
-      await TaskController.updateOrderStatusOnProductionProgress(id);
-    }
+      if (newStatus === 'COMPLETED') {
+        await TaskController.updateOrderStatusOnTaskCompletion(id);
+      } else {
+        await TaskController.updateOrderStatusOnProductionProgress(id);
+      }
 
       // Recalcula prioridades após atualização
       await TaskController.recalculateAllPriorities();
@@ -733,11 +850,11 @@ async updateOrderStatusOnTaskCompletion(taskId) {
         }
       });
 
-    if (status === 'COMPLETED') {
-      await TaskController.updateOrderStatusOnTaskCompletion(id);
-    } else if (status === 'IN_PRODUCTION') {
-      await TaskController.updateOrderStatusOnProductionProgress(id);
-    }
+      if (status === 'COMPLETED') {
+        await TaskController.updateOrderStatusOnTaskCompletion(id);
+      } else if (status === 'IN_PRODUCTION') {
+        await TaskController.updateOrderStatusOnProductionProgress(id);
+      }
 
       // Recalcula prioridades se necessário
       if (status === 'COMPLETED' || status === 'CANCELLED') {
@@ -751,98 +868,58 @@ async updateOrderStatusOnTaskCompletion(taskId) {
     }
   },
 
-async syncNewOrdersOnly(req, res, next) {
-  try {
-    console.log("🔄 Iniciando sincronização INTELIGENTE de pedidos...");
-    
-    const unsyncedOrders = await prisma.order.findMany({
-      where: {
-        productionSynced: false,
-        status: {
-          notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
+  async syncNewOrdersOnly(req, res, next) {
+    try {
+      console.log("🔄 Iniciando sincronização INTELIGENTE de pedidos...");
+      
+      const unsyncedOrders = await prisma.order.findMany({
+        where: {
+          productionSynced: false,
+          status: {
+            notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']
+          }
+        },
+        include: {
+          items: {
+            include: {
+              product: true
+            }
           }
         }
+      });
+
+      console.log(`📦 Encontrados ${unsyncedOrders.length} pedidos NÃO SINCRONIZADOS`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const order of unsyncedOrders) {
+        try {
+          await TaskController.syncProductionTasks(order.id);
+          successCount++;
+          console.log(`Pedido ${order.id} sincronizado`);
+        } catch (orderError) {
+          errorCount++;
+          console.error(`Erro ao sincronizar pedido ${order.id}:`, orderError);
+        }
       }
-    });
 
-    console.log(`📦 Encontrados ${unsyncedOrders.length} pedidos NÃO SINCRONIZADOS`);
+      await TaskController.recalculateAllPriorities();
 
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const order of unsyncedOrders) {
-      try {
-        await TaskController.syncProductionTasks(order.id);
-        successCount++;
-        console.log(`Pedido ${order.id} sincronizado`);
-      } catch (orderError) {
-        errorCount++;
-        console.error(`Erro ao sincronizar pedido ${order.id}:`, orderError);
-      }
+      res.status(200).json({
+        message: "Sincronização inteligente concluída",
+        summary: {
+          totalUnsynced: unsyncedOrders.length,
+          successCount,
+          errorCount,
+          note: "Produção em andamento foi preservada"
+        }
+      });
+    } catch (error) {
+      console.error('❌ Erro na sincronização inteligente:', error);
+      next(error);
     }
-
-    await TaskController.recalculateAllPriorities();
-
-    res.status(200).json({
-      message: "Sincronização inteligente concluída",
-      summary: {
-        totalUnsynced: unsyncedOrders.length,
-        successCount,
-        errorCount,
-        note: "Produção em andamento foi preservada"
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Erro na sincronização inteligente:', error);
-    next(error);
-  }
-},
-
-async getSyncStatus(req, res, next) {
-  try {
-    const totalOrders = await prisma.order.count();
-    const syncedOrders = await prisma.order.count({
-      where: { productionSynced: true }
-    });
-    
-    const unsyncedOrders = await prisma.order.count({
-      where: { 
-        productionSynced: false,
-        status: {
-          notIn: ['READY_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']
-        }
-      }
-    });
-
-    const productionTasks = await prisma.productionTask.count({
-      where: {
-        status: {
-          in: ['PENDING', 'IN_PRODUCTION']
-        }
-      }
-    });
-
-    res.status(200).json({
-      syncStatus: {
-        totalOrders,
-        syncedOrders,
-        unsyncedOrders,
-        productionTasks,
-        syncPercentage: totalOrders > 0 ? Math.round((syncedOrders / totalOrders) * 100) : 0
-      }
-    });
-  } catch (error) {
-    console.error(' Erro ao buscar status de sincronização:', error);
-    next(error);
-  }
-},
+  },
 
   // Atualizar tarefa completa
   async put(req, res, next) {
