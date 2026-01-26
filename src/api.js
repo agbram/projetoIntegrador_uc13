@@ -16,6 +16,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import path from "path";
 import { fileURLToPath } from "url";
+import pricingRoutes from './routes/pricing.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,6 +58,7 @@ app.use("/supply", verificaToken, supplyRoutes);
 app.use("/task", verificaToken, taskRoutes);
 app.use("/supplyPurchases", verificaToken, supplyPurchaseRoutes);
 app.use("/imagens", express.static(path.join(__dirname, "../imagens")));
+app.use('/pricing', pricingRoutes);
 
 
 

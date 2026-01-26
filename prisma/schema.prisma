@@ -46,6 +46,13 @@ enum Priority {
   URGENT
 }
 
+enum PriceStatus {
+  NOT_CALCULATED  // Ainda não calculado
+  CALCULATED      // Preço calculado
+  PENDING         // Aguardando precificação
+}
+
+
 model Customer {
   id        Int          @id @default(autoincrement())
   name      String
@@ -69,28 +76,76 @@ model Customer {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  fotoUrl     String?
-
+  id            Int         @id @default(autoincrement())
+  name          String
+  description   String?
+  fotoUrl       String?
   category      Category
-  costPrice     Float   @default(0)
-  markupPercent Float   @default(0)
-  salePrice     Float   @default(0)
-  isActive      Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  costPrice     Float?      // Calculado automaticamente a partir dos ingredientes
+  markupPercent Float?      // Percentual de markup
+  salePrice     Float?      // Preço final de venda
+  priceStatus   PriceStatus @default(NOT_CALCULATED) // NOVO CAMPO
+  profitPercent Float?      // Percentual de lucro desejado
+  expensePercent Float?     // Percentual de despesas
+  taxPercent    Float?      // Percentual de impostos
+  minProfit     Float?      // Lucro mínimo em valor
+  weight        Float?      // Peso do produto (kg)
+  yield         Float?      // Rendimento (unidades produzidas)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   orderItems     OrderItem[]
   productionTasks ProductionTask[]
+  ingredients    ProductIngredient[] // Relação com ingredientes
 
   @@map("products")
   @@index([name])
   @@index([category])
   @@index([isActive])
   @@index([salePrice])
+  @@index([priceStatus]) // Novo índice
+}
+
+model Ingredient {
+  id            Int        @id @default(autoincrement())
+  name          String     @unique
+  unit          String     // kg, g, L, ml, un
+  unitCost      Float      // Custo por unidade
+  category      String?    // Ex: Secos, Líquidos, Frescos
+  supplier      String?
+  notes         String?
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  products      ProductIngredient[]
+
+  @@map("ingredients")
+  @@index([name])
+  @@index([category])
+  @@index([isActive])
+}
+
+model ProductIngredient {
+  id            Int       @id @default(autoincrement())
+  productId     Int
+  ingredientId  Int
+  quantity      Float     // Quantidade usada
+  unit          String    // Unidade de medida usada
+  totalCost     Float     // Quantidade * unitCost
+  notes         String?
+  
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([productId, ingredientId], name: "product_ingredient_unique")
+  @@map("product_ingredients")
+  @@index([productId])
+  @@index([ingredientId])
 }
 
 model Order {
