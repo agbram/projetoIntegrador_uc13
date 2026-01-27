@@ -11,7 +11,7 @@ import swaggerUi from "swagger-ui-express";
 import userRoutes from "./routes/user.js";
 import orderRoutes from "./routes/order.js";
 import productRoutes from "./routes/product.js";
-import fixedExpenseRoutes from "./routes/fixedExpense.js";
+import fixedExpenseRoutes from "./routes/fixedexpense.js";
 import customerRoutes from "./routes/customer.js";
 import taskRoutes from "./routes/tasks.js";
 import supplyRoutes from "./routes/supply.js";
