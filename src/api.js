@@ -39,7 +39,7 @@ const swaggerOptions = {
     servers: [{ url: 'http://localhost:4000', description: 'Local' }]
   },
   // aponte para os arquivos onde você vai colocar os comentários @openapi
-  apis: ['./src/routes/*.js'] // se não usar subpastas
+  apis: ['./routes/*.js'] // se não usar subpastas
 };
 
 const swaggerSpecs = swaggerJSDoc(swaggerOptions);
