@@ -18,7 +18,7 @@ export const UserController = {
         return;
       }
 
-      const ok = await bcrypt.compare(senha, u.password);
+      const ok = await bcrypt.compare(senha, u.senha);;
       if (!ok) {
         return res.status(401).json({ erro: "Email ou senha inválidos..." });
       }
