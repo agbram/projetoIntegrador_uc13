@@ -93,6 +93,13 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Erro interno do servidor" });
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "API online",
+    message: "Backend rodando corretamente 🚀"
+  });
+});
+
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
