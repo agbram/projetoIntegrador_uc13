@@ -1,36 +1,26 @@
 {
   "name": "projetointegrador_uc13",
   "version": "1.0.0",
-  "description": "",
   "type": "module",
   "main": "src/api.js",
   "scripts": {
     "dev": "cross-env PORT=4000 nodemon src/api.js",
-    "build": "tsc",
     "start": "node src/api.js",
     "postinstall": "npx prisma generate",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node prisma/seed.js",
-    "setup": "npm run seed && npm run dev"
+    "seed": "node prisma/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.16.3",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "cros": "^1.1.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.6",
-    "swagger": "^0.7.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "uuid": "^13.0.0",
-    "venom-bot": "^5.3.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
