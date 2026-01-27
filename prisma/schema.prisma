@@ -7,6 +7,243 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Customer {
+  id        Int          @id @default(autoincrement())
+  name      String
+  type      CustomerType @default(PJ_CNPJ)
+  document  String       @unique
+  contact   String?
+  email     String?      @unique
+  address   String?
+  note      String?
+  modality  Modality
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  orders    Order[]
+
+  @@index([name])
+  @@index([document])
+  @@index([isActive])
+  @@map("customers")
+}
+
+model Product {
+  id              Int                 @id @default(autoincrement())
+  name            String
+  description     String?
+  fotoUrl         String?
+  category        Category
+  costPrice       Float?
+  markupPercent   Float?
+  salePrice       Float?
+  priceStatus     PriceStatus         @default(NOT_CALCULATED)
+  profitPercent   Float?
+  expensePercent  Float?
+  taxPercent      Float?
+  minProfit       Float?
+  weight          Float?
+  yield           Float?
+  isActive        Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  orderItems      OrderItem[]
+  ingredients     ProductIngredient[]
+  productionTasks ProductionTask?
+
+  @@index([name])
+  @@index([category])
+  @@index([isActive])
+  @@index([salePrice])
+  @@index([priceStatus])
+  @@map("products")
+}
+
+model Ingredient {
+  id        Int                 @id @default(autoincrement())
+  name      String              @unique
+  unit      String
+  unitCost  Float
+  category  String?
+  supplier  String?
+  notes     String?
+  isActive  Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  products  ProductIngredient[]
+
+  @@index([name])
+  @@index([category])
+  @@index([isActive])
+  @@map("ingredients")
+}
+
+model ProductIngredient {
+  id           Int        @id @default(autoincrement())
+  productId    Int
+  ingredientId Int
+  quantity     Float
+  unit         String
+  totalCost    Float
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, ingredientId], name: "product_ingredient_unique")
+  @@index([productId])
+  @@index([ingredientId])
+  @@map("product_ingredients")
+}
+
+model Order {
+  id               Int              @id @default(autoincrement())
+  customerId       Int
+  userId           Int?             @default(1)
+  orderDate        DateTime         @default(now())
+  deliveryDate     DateTime?
+  status           OrderStatus      @default(PENDING)
+  notes            String?
+  subtotal         Float?
+  discount         Float?           @default(0)
+  total            Float?           @default(0)
+  productionSynced Boolean          @default(false)
+  syncedAt         DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  items            OrderItem[]
+  customer         Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user             User?            @relation(fields: [userId], references: [id])
+  productionTasks  ProductionTask[] @relation("OrderToProductionTask")
+
+  @@index([customerId])
+  @@index([status])
+  @@index([deliveryDate])
+  @@index([productionSynced])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                Int      @id @default(autoincrement())
+  orderId           Int
+  productId         Int
+  quantity          Int      @default(1)
+  unitPrice         Float
+  subtotal          Float
+  productionCounted Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([productionCounted])
+  @@map("order_items")
+}
+
+model FixedExpense {
+  id          Int      @id @default(autoincrement())
+  description String
+  value       Float
+  date        DateTime @default(now())
+  recurring   Boolean  @default(false)
+  category    String?
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
+  @@index([category])
+  @@index([recurring])
+  @@map("fixed_expenses")
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String?
+  email     String      @unique
+  password  String
+  phone     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  groups    GroupUser[]
+  orders    Order[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Rule {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String
+  groups      RuleGroup[]
+
+  @@map("rules")
+}
+
+model Group {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String
+  users       GroupUser[]
+  rules       RuleGroup[]
+
+  @@map("groups")
+}
+
+model GroupUser {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  groupId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  group     Group    @relation(fields: [groupId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, groupId], name: "userId_groupId")
+  @@map("group_users")
+}
+
+model RuleGroup {
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  ruleId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  group     Group    @relation(fields: [groupId], references: [id])
+  rule      Rule     @relation(fields: [ruleId], references: [id])
+
+  @@unique([groupId, ruleId], name: "groupId_ruleId")
+  @@map("rule_groups")
+}
+
+model ProductionTask {
+  id                Int              @id @default(autoincrement())
+  productId         Int              @unique
+  totalQuantity     Int
+  pendingQuantity   Int
+  completedQuantity Int              @default(0)
+  status            ProductionStatus @default(PENDING)
+  priority          Priority         @default(MEDIUM)
+  dueDate           DateTime?
+  processedOrders   Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  product           Product          @relation(fields: [productId], references: [id])
+  orders            Order[]          @relation("OrderToProductionTask")
+
+  @@index([productId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("production_tasks")
+}
+
 enum Modality {
   Atacado
   Varejo
@@ -47,265 +284,7 @@ enum Priority {
 }
 
 enum PriceStatus {
-  NOT_CALCULATED  // Ainda não calculado
-  CALCULATED      // Preço calculado
-  PENDING         // Aguardando precificação
-}
-
-
-model Customer {
-  id        Int          @id @default(autoincrement())
-  name      String
-  type      CustomerType @default(PJ_CNPJ)
-  document  String       @unique
-  contact   String?
-  email     String?      @unique
-  address   String?
-  note      String?
-  modality  Modality
-  isActive  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  orders Order[]
-
-  @@map("customers")
-  @@index([name])
-  @@index([document])
-  @@index([isActive])
-}
-
-model Product {
-  id            Int         @id @default(autoincrement())
-  name          String
-  description   String?
-  fotoUrl       String?
-  category      Category
-  costPrice     Float?      // Calculado automaticamente a partir dos ingredientes
-  markupPercent Float?      // Percentual de markup
-  salePrice     Float?      // Preço final de venda
-  priceStatus   PriceStatus @default(NOT_CALCULATED) // NOVO CAMPO
-  profitPercent Float?      // Percentual de lucro desejado
-  expensePercent Float?     // Percentual de despesas
-  taxPercent    Float?      // Percentual de impostos
-  minProfit     Float?      // Lucro mínimo em valor
-  weight        Float?      // Peso do produto (kg)
-  yield         Float?      // Rendimento (unidades produzidas)
-  isActive      Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  orderItems     OrderItem[]
-  productionTasks ProductionTask[]
-  ingredients    ProductIngredient[] // Relação com ingredientes
-
-  @@map("products")
-  @@index([name])
-  @@index([category])
-  @@index([isActive])
-  @@index([salePrice])
-  @@index([priceStatus]) // Novo índice
-}
-
-model Ingredient {
-  id            Int        @id @default(autoincrement())
-  name          String     @unique
-  unit          String     // kg, g, L, ml, un
-  unitCost      Float      // Custo por unidade
-  category      String?    // Ex: Secos, Líquidos, Frescos
-  supplier      String?
-  notes         String?
-  isActive      Boolean    @default(true)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  products      ProductIngredient[]
-
-  @@map("ingredients")
-  @@index([name])
-  @@index([category])
-  @@index([isActive])
-}
-
-model ProductIngredient {
-  id            Int       @id @default(autoincrement())
-  productId     Int
-  ingredientId  Int
-  quantity      Float     // Quantidade usada
-  unit          String    // Unidade de medida usada
-  totalCost     Float     // Quantidade * unitCost
-  notes         String?
-  
-  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  @@unique([productId, ingredientId], name: "product_ingredient_unique")
-  @@map("product_ingredients")
-  @@index([productId])
-  @@index([ingredientId])
-}
-
-model Order {
-  id           Int         @id @default(autoincrement())
-  customerId   Int
-  customer     Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  userId       Int?        @default(1)
-  user         User?       @relation(fields: [userId], references: [id])
-
-  orderDate    DateTime    @default(now())
-  deliveryDate DateTime?
-  status       OrderStatus @default(PENDING)
-  notes        String?
-  subtotal     Float?      
-  discount     Float?      @default(0)
-  total        Float?      @default(0)
-  productionSynced Boolean @default(false)
-  syncedAt     DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  items           OrderItem[]
-  productionTasks ProductionTask[]
-
-  @@map("orders")
-  @@index([customerId])
-  @@index([status])
-  @@index([deliveryDate])
-  @@index([productionSynced])
-  @@index([createdAt])
-}
-
-model OrderItem {
-  id        Int     @id @default(autoincrement())
-  orderId   Int
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-
-  quantity  Int     @default(1)
-  unitPrice Float
-  subtotal  Float
-  productionCounted Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("order_items")
-  @@index([orderId])
-  @@index([productId])
-  @@index([productionCounted])
-}
-
-model FixedExpense {
-  id          Int      @id @default(autoincrement())
-  description String
-  value       Float
-  date        DateTime @default(now())
-  recurring   Boolean  @default(false)
-  category    String?
-  note        String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("fixed_expenses")
-  @@index([date])
-  @@index([category])
-  @@index([recurring])
-}
-
-model User {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  email    String  @unique
-  password String
-  phone    String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  orders Order[]
-  groups GroupUser[]
-
-  @@map("users")
-  @@index([email])
-}
-
-model Rule {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  description String
-
-  groups RuleGroup[]
-
-  @@map("rules")
-}
-
-model Group {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  description String
-
-  rules RuleGroup[]
-  users GroupUser[]
-
-  @@map("groups")
-}
-
-model GroupUser {
-  id      Int   @id @default(autoincrement())
-  user    User  @relation(fields: [userId], references: [id])
-  userId  Int
-  group   Group @relation(fields: [groupId], references: [id])
-  groupId Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, groupId], name: "userId_groupId")
-  @@map("group_users")
-}
-
-model RuleGroup {
-  id      Int   @id @default(autoincrement())
-  group   Group @relation(fields: [groupId], references: [id])
-  groupId Int
-  rule    Rule  @relation(fields: [ruleId], references: [id])
-  ruleId  Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([groupId, ruleId], name: "groupId_ruleId")
-  @@map("rule_groups")
-}
-
-model ProductionTask {
-  id                Int              @id @default(autoincrement())
-  productId         Int
-  product           Product          @relation(fields: [productId], references: [id])
-  totalQuantity     Int
-  pendingQuantity   Int
-  completedQuantity Int              @default(0)
-  status            ProductionStatus @default(PENDING)
-  priority          Priority         @default(MEDIUM)
-  dueDate           DateTime?
-  processedOrders   Json?
-  
-  orders Order[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("production_tasks")
-  @@unique([productId])
-  @@index([productId])
-  @@index([status])
-  @@index([dueDate])
-  @@index([priority])
-  @@index([createdAt])
+  NOT_CALCULATED
+  CALCULATED
+  PENDING
 }
