@@ -6,10 +6,8 @@
   "scripts": {
     "dev": "cross-env PORT=4000 nodemon src/api.js",
     "start": "node src/api.js",
-    "build": "npm install && npx prisma generate",
     "seed": "node prisma/seed.js",
-    "deploy": "npm run build && npm run seed",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate && node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
