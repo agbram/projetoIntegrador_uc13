@@ -30,7 +30,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 const allowedOrigins = [
-  'https://seu-frontend.netlify.app', // Seu domínio Netlify
+  'https://santsaporemanager.netlify.app', // Seu domínio Netlify
   'http://localhost:3000'             // Para desenvolvimento
 ];
 
