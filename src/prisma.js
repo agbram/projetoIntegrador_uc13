@@ -1,8 +1,5 @@
-import { createClient } from "@neondatabase/serverless";
+import pkg from "@prisma/client";
+const { PrismaClient} = pkg;
 
-const client = createClient({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const result = await client.query("SELECT * FROM users");
-console.log(result.rows);
+const prisma = new PrismaClient();
+export default prisma;
