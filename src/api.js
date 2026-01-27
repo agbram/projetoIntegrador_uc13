@@ -28,7 +28,25 @@ const __dirname = path.dirname(__filename);
 
 // App
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  'https://seu-frontend.netlify.app', // Seu domínio Netlify
+  'http://localhost:3000'             // Para desenvolvimento
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permitir requisições sem origem (como mobile apps ou curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'CORS policy: Origin não permitido';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
