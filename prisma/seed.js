@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
@@ -98,7 +99,7 @@ await connectRuleToGroup({ groupId: groups['Confeiteiras'].id,        ruleId: ru
 // 4) (Opcional) Vincula Users a Groups
 // Se já existir User com id 1 e 2, por exemplo:
   try {
-    await connectUserToGroup({ userId: 1, groupId: groups['Administrador'].id });
+    await connectUserToGroup({ userId: user.id, groupId: groups['Administrador'].id });
     } catch {
     
     console.log('Seed concluído com Rules, Groups, RuleGroup e GroupUser');
