@@ -1,15 +1,11 @@
 import prisma from "../prisma.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { registerSchema, loginSchema, updateSchema } from "./validators/UserValidator.js";
 
 export const UserController = {
   async login(req, res, next) {
     try {
-      // Validação
-      const { error } = loginSchema.validate(req.body);
-      if (error) return res.status(400).json({ error: error.details[0].message });
-
+      // já validado em rota
       const { email, senha } = req.body;
 
       const u = await prisma.user.findFirst({ where: { email } });
@@ -32,14 +28,11 @@ export const UserController = {
 
   async store(req, res) {
     try {
-      // Validação
-      const { error } = registerSchema.validate(req.body);
-      if (error) return res.status(400).json({ error: error.details[0].message });
-
-      const { name, email, password, phone, group } = req.body;
+      // já validado em rota
+      const { name, email, senha, phone, group } = req.body;
 
       // Criptografa a senha
-      const hash = await bcrypt.hash(password, 12);
+      const hash = await bcrypt.hash(senha, 12);
 
       // Cria usuário
       const user = await prisma.user.create({
@@ -122,12 +115,9 @@ export const UserController = {
 
   async update(req, res) {
     try {
-      // Validação
-      const { error } = updateSchema.validate(req.body);
-      if (error) return res.status(400).json({ error: error.details[0].message });
-
+      // já validado em rota
       const body = {};
-      if (req.body.password) body.password = await bcrypt.hash(req.body.password, 12);
+      if (req.body.senha) body.password = await bcrypt.hash(req.body.senha, 12);
       if (req.body.email) body.email = req.body.email;
       if (req.body.name) body.name = req.body.name;
       if (req.body.phone) body.phone = req.body.phone;
