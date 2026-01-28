@@ -1,34 +1,25 @@
 import prisma from "../prisma.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { registerSchema, loginSchema, updateSchema } from "./validators/UserValidator.js";
 
-//assincrona nome_da_funcao(requisicao, resposta, proximo)
 export const UserController = {
   async login(req, res, next) {
     try {
-      console.log(req.body);
+      // Validação
+      const { error } = loginSchema.validate(req.body);
+      if (error) return res.status(400).json({ error: error.details[0].message });
+
       const { email, senha } = req.body;
 
-      let u = await prisma.user.findFirst({
-        where: { email: email },
-      });
-
-      if (!u) {
-        res.status(404).json({ error: "Não tem usuário com esse email..." });
-        return;
-      }
+      const u = await prisma.user.findFirst({ where: { email } });
+      if (!u) return res.status(404).json({ error: "Usuário não encontrado" });
 
       const ok = await bcrypt.compare(senha, u.password);
-      if (!ok) {
-        return res.status(401).json({ erro: "Email ou senha inválidos..." });
-      }
+      if (!ok) return res.status(401).json({ error: "Email ou senha inválidos" });
 
       const token = jwt.sign(
-        {
-          sub: u.id,
-          email: u.email,
-          name: u.name,
-        },
+        { sub: u.id, email: u.email, name: u.name },
         process.env.JWT_SECRET,
         { expiresIn: "10h" }
       );
@@ -39,58 +30,46 @@ export const UserController = {
     }
   },
 
-async store(req, res) {
-  try {
-    const { name, email, password, phone, group } = req.body;
+  async store(req, res) {
+    try {
+      // Validação
+      const { error } = registerSchema.validate(req.body);
+      if (error) return res.status(400).json({ error: error.details[0].message });
 
-    if (!name || !email || !password || !group) {
-      return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
-    }
+      const { name, email, password, phone, group } = req.body;
 
-    // Criptografa a senha
-    const hash = await bcrypt.hash(password, 10);
+      // Criptografa a senha
+      const hash = await bcrypt.hash(password, 12);
 
-    // Cria usuário e conecta aos grupos
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hash,
-        phone
-      }
-  });
+      // Cria usuário
+      const user = await prisma.user.create({
+        data: { name, email, password: hash, phone },
+      });
 
+      // Conecta aos grupos
       await prisma.groupUser.create({
-      data: {
-        userId: user.id,
-        groupId: group, // aqui você passa o ID do grupo que veio do body
-      },
-    });
+        data: { userId: user.id, groupId: group },
+      });
 
-    const userWithGroup = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: {
-        group: {
-          include: {
-            group:{select: { id: true, name: true }}, // isso puxa os dados do Group real
-          },
+      const userWithGroup = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          group: { include: { group: { select: { id: true, name: true } } } },
         },
-      },
-    });
+      });
 
-    res.status(201).json(userWithGroup);
-  } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    res.status(500).json({ error: "Erro interno ao criar usuário." });
-  }
-},
-  
-  async index(req, res, _next) {
+      res.status(201).json(userWithGroup);
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+      res.status(500).json({ error: "Erro interno ao criar usuário." });
+    }
+  },
+
+  async index(req, res) {
     try {
       const { name, email, phone } = req.query;
 
       let users;
-
       if (name || email || phone) {
         users = await prisma.user.findMany({
           where: {
@@ -102,86 +81,69 @@ async store(req, res) {
           },
         });
       } else {
-        // se nao tiver filtro, retorna todos
         users = await prisma.user.findMany({
-      include: {
-        group: {
           include: {
             group: {
-              select: { id: true, name: true },
+              include: { group: { select: { id: true, name: true } } },
             },
           },
-        },
-      },
-    });
-  }
+        });
+      }
+
       res.status(200).json(users);
     } catch (err) {
-      res.status(500).json({ error: "Erro ao buscar usuarios!" });
+      res.status(500).json({ error: "Erro ao buscar usuários!" });
     }
   },
 
-  async show(req, res, _next) {
+  async show(req, res) {
     try {
       const id = Number(req.params.id);
-
-      const u = await prisma.user.findFirstOrThrow({
-        where: { id },
-      });
-
+      const u = await prisma.user.findFirstOrThrow({ where: { id } });
       res.status(200).json(u);
     } catch (err) {
-      res.status(404).json("Error: Id nao encontrado!");
+      res.status(404).json({ error: "Id não encontrado!" });
     }
   },
 
-  async del(req, res, _next) {
+  async del(req, res) {
     try {
       const id = Number(req.params.id);
       if (id === 1) {
-        return res
-          .status(403)
-          .json({ error: "Não é permitido deletar o usuário administrador." });
+        return res.status(403).json({ error: "Não é permitido deletar o administrador." });
       }
-      const u = await prisma.user.delete({
-        where: { id },
-      });
-      console.log(u);
+
+      const u = await prisma.user.delete({ where: { id } });
       res.status(200).json(u);
     } catch (err) {
-      res.status(404).json("Error: Id nao encontrado!");
+      res.status(404).json({ error: "Id não encontrado!" });
     }
   },
 
-  async update(req, res, next) {
+  async update(req, res) {
     try {
-      let body = {};
+      // Validação
+      const { error } = updateSchema.validate(req.body);
+      if (error) return res.status(400).json({ error: error.details[0].message });
 
-      if (req.body.password) body.password = req.body.password;
+      const body = {};
+      if (req.body.password) body.password = await bcrypt.hash(req.body.password, 12);
       if (req.body.email) body.email = req.body.email;
       if (req.body.name) body.name = req.body.name;
       if (req.body.phone) body.phone = req.body.phone;
 
       const id = Number(req.params.id);
 
-      if (id === 1) {
-        if (req.body.permission === false || req.body.email) {
-          return res.status(403).json({
-            error:
-              "Não é permitido desativar ou alterar o email do administrador.",
-          });
-        }
+      if (id === 1 && (req.body.permission === false || req.body.email)) {
+        return res.status(403).json({
+          error: "Não é permitido desativar ou alterar o email do administrador.",
+        });
       }
-      const u = await prisma.user.update({
-        where: { id },
-        data: body,
-      });
 
+      const u = await prisma.user.update({ where: { id }, data: body });
       res.status(200).json(u);
     } catch (err) {
-      res
-        .status(404)
-        .json("Error: Usuário não encontrado ou não pode ser alterado...");
+      res.status(404).json({ error: "Usuário não encontrado ou não pode ser alterado." });
     }
   },
 };

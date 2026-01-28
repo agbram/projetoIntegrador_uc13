@@ -1,6 +1,7 @@
 import express from 'express';
 import { UserController } from '../controllers/user.js';
 import { verificaToken } from '../middlewares/auth.js';
+import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
 
@@ -194,6 +195,15 @@ router.delete('/:id', verificaToken, UserController.del);
  *       401:
  *         description: Credenciais inválidas
  */
-router.post('/login', UserController.login);
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 tentativas
+  message: { error: "Muitas tentativas de login. Tente novamente mais tarde." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post('/login', loginLimiter, UserController.login);
 
 export default router;

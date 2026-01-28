@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // Routes
 import userRoutes from "./routes/user.js";
@@ -27,6 +29,10 @@ const __dirname = path.dirname(__filename);
 
 // App
 const app = express();
+
+
+
+app.use(helmet());
 
 // ============================================
 // MIDDLEWARE CORS CRÍTICO - DEVE SER O PRIMEIRO
@@ -58,6 +64,14 @@ app.use((req, res, next) => {
   }
   
   next();
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 tentativas
+  message: { error: "Muitas tentativas de login. Tente novamente mais tarde." },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 app.use(express.json({ limit: "10mb" }));
