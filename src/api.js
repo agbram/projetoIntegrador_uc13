@@ -118,6 +118,8 @@ app.get("/", (req, res) => {
   });
 });
 
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
