@@ -28,22 +28,32 @@ const __dirname = path.dirname(__filename);
 // App
 const app = express();
 
-// MIDDLEWARE CORS MANUAL - MUITO IMPORTANTE
+// ============================================
+// MIDDLEWARE CORS CRÍTICO - DEVE SER O PRIMEIRO
+// ============================================
 app.use((req, res, next) => {
-  const allowedOrigins = ['https://santsaporemanager.netlify.app', 'http://localhost:3000'];
+  const allowedOrigins = [
+    'https://santsaporemanager.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+  
   const origin = req.headers.origin;
   
-  if (allowedOrigins.includes(origin)) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  res.setHeader('Access-Control-Max-Age', '86400');
   
-  // Handle preflight requests
+  // Log para debug
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Origin: ${origin}`);
+  
   if (req.method === 'OPTIONS') {
+    console.log(`✅ Respondendo OPTIONS para ${req.url}`);
     return res.status(200).end();
   }
   
@@ -52,15 +62,6 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
-
-// Middleware de log para debug
-app.use((req, res, next) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
-  console.log(`Origin: ${req.headers.origin}`);
-  console.log(`User-Agent: ${req.headers['user-agent']}`);
-  next();
-});
 
 // Swagger
 const swaggerOptions = {
@@ -84,7 +85,19 @@ const swaggerOptions = {
 const swaggerSpecs = swaggerJSDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
-// Rotas - IMPORTANTE: A rota /users deve vir primeiro (sem auth)
+// ============================================
+// CORS ESPECÍFICO PARA LOGIN (CRÍTICO)
+// ============================================
+app.options('/users/login', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'https://santsaporemanager.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  console.log('🔧 OPTIONS específico para /users/login');
+  res.status(200).end();
+});
+
+// Rotas
 app.use("/users", userRoutes);
 app.use("/orders", verificaToken, orderRoutes);
 app.use("/products", verificaToken, productRoutes);
@@ -108,70 +121,50 @@ app.use("/pricing", pricingRoutes);
 // Arquivos estáticos
 app.use("/imagens", express.static(path.join(__dirname, "../imagens")));
 
-// Health check endpoint
+// Health check com CORS explícito
 app.get("/health", (req, res) => {
-  res.json({
+  res.header('Access-Control-Allow-Origin', 'https://santsaporemanager.netlify.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.json({ 
     status: "online",
     timestamp: new Date().toISOString(),
-    cors: {
-      allowedOrigin: req.headers.origin || "none",
-      method: req.method
-    }
+    cors: "configurado",
+    origin: req.headers.origin
   });
 });
 
-// Root endpoint
 app.get("/", (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'https://santsaporemanager.netlify.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.json({
-    message: "API Sant Sapore - Backend Online",
-    version: "1.0.0",
-    endpoints: {
-      login: "/users/login",
-      health: "/health",
-      docs: "/docs"
-    }
+    status: "API online",
+    message: "Backend rodando corretamente 🚀",
+    login: "/users/login"
   });
 });
 
 // Tratamento de erros
 app.use((err, req, res, next) => {
-  console.error("Erro:", {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    origin: req.headers.origin
-  });
-
-  if (err.name === "ValidationError") {
-    return res.status(400).json({ error: err.message });
-  }
-
+  console.error("ERRO:", err.message);
+  
+  // Adiciona headers CORS mesmo em erros
+  res.header('Access-Control-Allow-Origin', 'https://santsaporemanager.netlify.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   if (err.code === "P2002") {
     return res.status(409).json({ error: "Registro duplicado" });
   }
-
   if (err.code === "P2025") {
     return res.status(404).json({ error: "Registro não encontrado" });
   }
-
+  
   res.status(500).json({ error: "Erro interno do servidor" });
 });
-
-// Log de inicialização
-console.log("=".repeat(50));
-console.log("🚀 Iniciando API Sant Sapore");
-console.log("📁 Diretório:", __dirname);
-console.log("🌐 Ambiente:", process.env.NODE_ENV || "development");
-console.log("🔗 CORS Permitido:");
-console.log("   - https://santsaporemanager.netlify.app");
-console.log("   - http://localhost:3000");
-console.log("=".repeat(50));
 
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando na porta ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`📚 Documentação: http://localhost:${PORT}/docs`);
+  console.log(`🚀 API rodando na porta ${PORT}`);
+  console.log(`✅ CORS configurado para: https://santsaporemanager.netlify.app`);
+  console.log(`🔗 Endpoint de login: https://projetosantsapore.onrender.com/users/login`);
 });
