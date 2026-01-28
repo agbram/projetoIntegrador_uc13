@@ -26,8 +26,21 @@ import { verificaRule } from "./middlewares/rules.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+
 // App
 const app = express();
+
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 const allowedOrigins = [
   'https://santsaporemanager.netlify.app', // Seu domínio Netlify
@@ -111,10 +124,14 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Erro interno do servidor" });
 });
 
+
 app.get("/", (req, res) => {
   res.json({
     status: "API online",
-    message: "Backend rodando corretamente 🚀"
+    message: "Backend rodando corretamente 🚀",
+    cors: {
+      allowedOrigins: allowedOrigins
+    }
   });
 });
 
