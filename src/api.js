@@ -26,40 +26,24 @@ import { verificaRule } from "./middlewares/rules.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-
 // App
 const app = express();
 
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
-
+// Defina allowedOrigins primeiro
 const allowedOrigins = [
   'https://santsaporemanager.netlify.app', // Seu domínio Netlify
   'http://localhost:3000'             // Para desenvolvimento
 ];
 
+// Middleware CORS simplificado - REMOVA a rota app.options('*', ...)
+// O middleware cors já cuida das requisições OPTIONS automaticamente
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requisições sem origem (como mobile apps ou curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'CORS policy: Origin não permitido';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
@@ -109,6 +93,27 @@ app.use("/pricing", pricingRoutes);
 // Arquivos estáticos
 app.use("/imagens", express.static(path.join(__dirname, "../imagens")));
 
+// Health check endpoint
+app.get("/health", (_req, res) => {
+  res.json({ 
+    status: "online",
+    timestamp: new Date().toISOString(),
+    cors: {
+      allowedOrigins: allowedOrigins
+    }
+  });
+});
+
+app.get("/", (req, res) => {
+  res.json({
+    status: "API online",
+    message: "Backend rodando corretamente 🚀",
+    cors: {
+      allowedOrigins: allowedOrigins
+    }
+  });
+});
+
 // Tratamento de erros
 app.use((err, _req, res, _next) => {
   console.error(err);
@@ -124,21 +129,11 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Erro interno do servidor" });
 });
 
-
-app.get("/", (req, res) => {
-  res.json({
-    status: "API online",
-    message: "Backend rodando corretamente 🚀",
-    cors: {
-      allowedOrigins: allowedOrigins
-    }
-  });
-});
-
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 API rodando na porta ${PORT}`);
+  console.log(`✅ CORS configurado para: ${allowedOrigins.join(', ')}`);
 });
