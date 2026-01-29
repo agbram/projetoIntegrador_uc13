@@ -6,8 +6,6 @@ import { fileURLToPath } from "url";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-
 // Routes
 import userRoutes from "./routes/user.js";
 import orderRoutes from "./routes/order.js";
@@ -64,14 +62,6 @@ app.use((req, res, next) => {
   }
   
   next();
-});
-
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // máximo 5 tentativas
-  message: { error: "Muitas tentativas de login. Tente novamente mais tarde." },
-  standardHeaders: true,
-  legacyHeaders: false,
 });
 
 app.use(express.json({ limit: "10mb" }));
