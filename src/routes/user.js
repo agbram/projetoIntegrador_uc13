@@ -19,6 +19,6 @@ router.get('/', verificaToken, UserController.index);
 router.get('/:id', verificaToken, UserController.show);
 router.put('/:id', verificaToken, validate(updateSchema), UserController.update);
 router.delete('/:id', verificaToken, UserController.del);
-router.post('/login', loginLimiter, validate(loginSchema), UserController.login);
+router.post('/login', validate(loginSchema), UserController.login);
 
 export default router;
