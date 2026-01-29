@@ -6,15 +6,6 @@ import { registerSchema, loginSchema, updateSchema } from '../validators/userVal
 
 const router = express.Router();
 
-// Rate limiter login
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // máximo 5 tentativas
-  message: { error: "Muitas tentativas de login. Tente novamente mais tarde." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // Middleware para validação com Joi
 const validate = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body);
