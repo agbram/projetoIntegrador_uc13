@@ -3,28 +3,33 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 export const UserController = {
-  async login(req, res, next) {
-    try {
-      // já validado em rota
-      const { email, senha } = req.body;
+async login(req, res, next) {
+  try {
+    // Agora aceita tanto 'senha' quanto 'password'
+    const { email, senha, password } = req.body;
+    const userPassword = senha || password; // Usa 'senha' ou 'password'
 
-      const u = await prisma.user.findFirst({ where: { email } });
-      if (!u) return res.status(404).json({ error: "Usuário não encontrado" });
-
-      const ok = await bcrypt.compare(senha, u.password);
-      if (!ok) return res.status(401).json({ error: "Email ou senha inválidos" });
-
-      const token = jwt.sign(
-        { sub: u.id, email: u.email, name: u.name },
-        process.env.JWT_SECRET,
-        { expiresIn: "10h" }
-      );
-
-      return res.json({ token });
-    } catch (e) {
-      next(e);
+    if (!userPassword) {
+      return res.status(400).json({ error: "Senha não fornecida" });
     }
-  },
+
+    const u = await prisma.user.findFirst({ where: { email } });
+    if (!u) return res.status(404).json({ error: "Usuário não encontrado" });
+
+    const ok = await bcrypt.compare(userPassword, u.password);
+    if (!ok) return res.status(401).json({ error: "Email ou senha inválidos" });
+
+    const token = jwt.sign(
+      { sub: u.id, email: u.email, name: u.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "10h" }
+    );
+
+    return res.json({ token });
+  } catch (e) {
+    next(e);
+  }
+},
 
   async store(req, res) {
     try {
