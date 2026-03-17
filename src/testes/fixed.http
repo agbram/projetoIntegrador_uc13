@@ -1,0 +1,15 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtQGdtYWlsLmNvbSIsIm5hbWUiOiJhZG0iLCJpYXQiOjE3NzM2ODk5NTUsImV4cCI6MTc3MzcyNTk1NX0.XdxFhvffWJRhyVbdseK2a1JYY9Bm0JJCPtU9FaPvuBc
+
+###
+POST http://localhost:4000/fixedExpenses HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "description": "Aluguel",
+  "value": 1500.00,
+  "date": "2025-03-01T00:00:00.000Z",
+  "recurring": true,
+  "category": "Aluguel",
+  "note": "escritório"
+}

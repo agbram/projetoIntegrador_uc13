@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider  = "sqlite"
   url       = env("DATABASE_URL") 
 }
 
@@ -152,6 +152,7 @@ model FixedExpense {
   recurring   Boolean  @default(false)
   category    String?
   note        String?
+  isActive    Boolean  @default(true)  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

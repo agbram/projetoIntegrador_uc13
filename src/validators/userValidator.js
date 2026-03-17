@@ -12,7 +12,7 @@ export const registerSchema = Joi.object({
 // Validação de login (campo "senha")
 export const loginSchema = Joi.object({
   email: Joi.string().email().required(),
-  senha: Joi.string().min(8).required(),
+  senha: Joi.string().min(1).required(),
 });
 
 // Validação de update (opcional)
