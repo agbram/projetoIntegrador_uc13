@@ -155,9 +155,13 @@ app.use((err, req, res, next) => {
 // Server
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 API rodando na porta ${PORT}`);
-  console.log(
-    `✅ CORS permitido para: http://localhost:3000, http://localhost:5173 e https://santsaporemanager.netlify.app`
-  );
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 API rodando na porta ${PORT}`);
+    console.log(
+      `✅ CORS permitido para: http://localhost:3000, http://localhost:5173 e https://santsaporemanager.netlify.app`
+    );
+  });
+}
+
+export default app;
