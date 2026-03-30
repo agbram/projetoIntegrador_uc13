@@ -7,6 +7,7 @@ router.post("/", FixedExpenseController.store);
 router.get("/", FixedExpenseController.index);
 router.get("/:id", FixedExpenseController.show);
 router.put("/:id", FixedExpenseController.put);
+router.patch("/:id", FixedExpenseController.put);
 router.delete("/:id", FixedExpenseController.delete);
 router.get("/summary", FixedExpenseController.summary);
 router.get("/summary/current", FixedExpenseController.currentMonthSummary);

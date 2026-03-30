@@ -6,9 +6,13 @@ export const FixedExpenseController = {
     try {
       const { description, value, date, recurring, category, note } = req.body;
 
-      // Validações básicas (opcional)
-      if (!description || !value) {
+      // Validações básicas
+      if (!description || value === undefined || value === null) {
         return res.status(400).json({ error: "Descrição e valor são obrigatórios." });
+      }
+
+      if (Number(value) < 0) {
+        return res.status(400).json({ error: "O valor não pode ser negativo." });
       }
 
       const newExpense = await prisma.fixedExpense.create({
@@ -79,6 +83,7 @@ export const FixedExpenseController = {
       const { description, value, date, recurring, category, note } = req.body;
 
       // Montar objeto com campos permitidos para atualização
+      const { isActive } = req.body;
       const data = {};
       if (description !== undefined) data.description = description;
       if (value !== undefined) data.value = parseFloat(value);
@@ -86,6 +91,7 @@ export const FixedExpenseController = {
       if (recurring !== undefined) data.recurring = recurring;
       if (category !== undefined) data.category = category;
       if (note !== undefined) data.note = note;
+      if (isActive !== undefined) data.isActive = isActive;
 
       if (Object.keys(data).length === 0) {
         return res.status(400).json({ message: "Nenhum campo para atualizar." });
@@ -102,25 +108,16 @@ export const FixedExpenseController = {
     }
   },
 
-  // "Deletar" (desativar ou excluir) uma despesa
+  // Excluir uma despesa
   async delete(req, res, next) {
     try {
       const id = Number(req.params.id);
 
-      // Se o modelo tem isActive, faz soft delete
-      if (prisma.fixedExpense.fields.isActive) {
-        await prisma.fixedExpense.update({
-          where: { id },
-          data: { isActive: false },
-        });
-        res.status(200).json({ message: "Despesa desativada com sucesso!" });
-      } else {
-        // Caso contrário, exclusão real
-        await prisma.fixedExpense.delete({
-          where: { id },
-        });
-        res.status(200).json({ message: "Despesa excluída permanentemente!" });
-      }
+      await prisma.fixedExpense.delete({
+        where: { id },
+      });
+
+      res.status(204).send();
     } catch (err) {
       next(err);
     }
