@@ -19,7 +19,7 @@ import supplyPurchaseRoutes from "./routes/supplyPurchase.js";
 import pricingRoutes from "./routes/pricing.js";
 
 // Middlewares
-import { } from "./middlewares/auth.js";
+import { verificaToken } from "./middlewares/auth.js";
 import { verificaRule } from "./middlewares/rules.js";
 
 // __dirname fix (ESM)
@@ -99,25 +99,22 @@ const swaggerSpecs = swaggerJSDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Rotas
-app.use("/users", userRoutes);
-app.use("/orders",  orderRoutes);
-app.use("/products",  productRoutes);
+app.use("/users", verificaToken, userRoutes);
+app.use("/orders", verificaToken, orderRoutes);
+app.use("/products", verificaToken, productRoutes);
 app.use(
   "/fixedExpenses",
-  
+  verificaToken,
   verificaRule("ADM"),
   fixedExpenseRoutes
 );
-app.use(
-  "/customers",
-  
-  verificaRule("ADM"),
+app.use("/customers",verificaToken, verificaRule("ADM"),
   customerRoutes
 );
-app.use("/supply",  supplyRoutes);
-app.use("/task",  taskRoutes);
-app.use("/supplyPurchases",  supplyPurchaseRoutes);
-app.use("/pricing", pricingRoutes);
+app.use("/supply", verificaToken, supplyRoutes);
+app.use("/task", verificaToken, taskRoutes);
+app.use("/supplyPurchases", verificaToken, supplyPurchaseRoutes);
+app.use("/pricing",verificaToken, pricingRoutes);
 
 // Arquivos estáticos
 app.use("/imagens", express.static(path.join(__dirname, "../imagens")));
