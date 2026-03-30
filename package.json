@@ -11,7 +11,7 @@
     "prisma:migrate": "npx prisma migrate deploy",
     "build": "npm run prisma:generate",
     "postinstall": "npm run build",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
