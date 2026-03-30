@@ -5,9 +5,8 @@ import bcrypt from "bcrypt";
 export const UserController = {
 async login(req, res, next) {
   try {
-    // Agora aceita tanto 'senha' quanto 'password'
     const { email, senha, password } = req.body;
-    const userPassword = senha || password; // Usa 'senha' ou 'password'
+    const userPassword = senha || password;
 
     if (!userPassword) {
       return res.status(400).json({ error: "Senha não fornecida" });
@@ -16,8 +15,19 @@ async login(req, res, next) {
     const u = await prisma.user.findFirst({ where: { email } });
     if (!u) return res.status(404).json({ error: "Usuário não encontrado" });
 
+    // Verifica se o usuário está ativo
+    if (u.isActive === false) {
+      return res.status(403).json({ error: "Sua conta está desativada. Contate o administrador." });
+    }
+
     const ok = await bcrypt.compare(userPassword, u.password);
     if (!ok) return res.status(401).json({ error: "Email ou senha inválidos" });
+
+    // Atualiza o horário de último acesso
+    await prisma.user.update({
+      where: { id: u.id },
+      data: { lastSeen: new Date() }
+    });
 
     const token = jwt.sign(
       { sub: u.id, email: u.email, name: u.name },
@@ -52,7 +62,7 @@ async login(req, res, next) {
       const userWithGroup = await prisma.user.findUnique({
         where: { id: user.id },
         include: {
-          group: { include: { group: { select: { id: true, name: true } } } },
+          groups: { include: { group: { select: { id: true, name: true } } } },
         },
       });
 
@@ -81,7 +91,7 @@ async login(req, res, next) {
       } else {
         users = await prisma.user.findMany({
           include: {
-            group: {
+            groups: {
               include: { group: { select: { id: true, name: true } } },
             },
           },
@@ -90,7 +100,8 @@ async login(req, res, next) {
 
       res.status(200).json(users);
     } catch (err) {
-      res.status(500).json({ error: "Erro ao buscar usuários!" });
+      console.error("Erro detalhado na listagem de usuários:", err);
+      res.status(500).json({ error: "Erro ao buscar usuários no Banco de Dados!" });
     }
   },
 
@@ -120,25 +131,47 @@ async login(req, res, next) {
 
   async update(req, res) {
     try {
-      // já validado em rota
-      const body = {};
-      if (req.body.senha) body.password = await bcrypt.hash(req.body.senha, 12);
-      if (req.body.email) body.email = req.body.email;
-      if (req.body.name) body.name = req.body.name;
-      if (req.body.phone) body.phone = req.body.phone;
-
+      const { email, name, phone, senha, isActive, group: groupId } = req.body;
       const id = Number(req.params.id);
 
-      if (id === 1 && (req.body.permission === false || req.body.email)) {
+      if (id === 1 && (isActive === false || email)) {
         return res.status(403).json({
           error: "Não é permitido desativar ou alterar o email do administrador.",
         });
       }
 
-      const u = await prisma.user.update({ where: { id }, data: body });
-      res.status(200).json(u);
+      const body = {};
+      if (senha) body.password = await bcrypt.hash(senha, 12);
+      if (email) body.email = email;
+      if (name) body.name = name;
+      if (phone) body.phone = phone;
+      if (isActive !== undefined) body.isActive = isActive;
+
+      // Update basic fields
+      const u = await prisma.user.update({
+        where: { id },
+        data: body,
+      });
+
+      // Update group if provided
+      if (groupId) {
+        await prisma.groupUser.deleteMany({ where: { userId: id } });
+        await prisma.groupUser.create({
+          data: { userId: id, groupId: Number(groupId) },
+        });
+      }
+
+      const userWithGroup = await prisma.user.findUnique({
+        where: { id },
+        include: {
+          groups: { include: { group: { select: { id: true, name: true } } } },
+        },
+      });
+
+      res.status(200).json(userWithGroup);
     } catch (err) {
-      res.status(404).json({ error: "Usuário não encontrado ou não pode ser alterado." });
+      console.error("Erro no update:", err);
+      res.status(404).json({ error: "Usuário não encontrado ou erro na atualização." });
     }
   },
 };

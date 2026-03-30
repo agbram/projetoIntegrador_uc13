@@ -30,7 +30,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 export { app };
 
-app.use(helmet());
+// app.use(helmet()); // Desativado temporariamente para permitir conexão do Electron
 
 // ============================================
 // MIDDLEWARE CORS PRINCIPAL
@@ -40,6 +40,8 @@ app.use((req, res, next) => {
     "http://localhost:3000",
     "http://localhost:5173",
     "https://santsaporemanager.netlify.app",
+    "http://localhost:3333",
+    "http://127.0.0.1:3333"
   ];
 
   const origin = req.headers.origin;
@@ -160,7 +162,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`🚀 API rodando na porta ${PORT}`);
     console.log(
-      `✅ CORS permitido para: http://localhost:3000, http://localhost:5173 e https://santsaporemanager.netlify.app`
+      `✅ CORS permitido para: http://localhost:3000, http://localhost:3333, http://localhost:5173 e https://santsaporemanager.netlify.app`
     );
   });
 }

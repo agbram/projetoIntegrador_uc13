@@ -109,6 +109,7 @@ CREATE TABLE "fixed_expenses" (
     "recurring" BOOLEAN NOT NULL DEFAULT false,
     "category" TEXT,
     "note" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -120,6 +121,8 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "phone" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "lastSeen" DATETIME,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
