@@ -1,0 +1,158 @@
+
+> projetointegrador_uc13@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js tests/pricing.test.js
+
+(node:13244) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/pricing.test.js
+  PricingController API Mathematical Engine
+    × CT-PRICE-01: Deve calcular corretamente Markup (Ignorando Impostos) (2 ms)
+    × CT-PRICE-02: Deve calcular Impostos Corretamente (Repasse Direto) (1 ms)
+    × CT-PRICE-03: Deve calcular corretamente Margem Desejada Fixa (1 ms)
+    × CT-PRICE-04: O Lucro Mínimo DEVE forçar novo repasse tributário e garantir o lucro
+
+  ● PricingController API Mathematical Engine › CT-PRICE-01: Deve calcular corretamente Markup (Ignorando Impostos)
+
+    PrismaClientValidationError: 
+    Invalid `prisma.product.create()` invocation in
+    C:\Users\Gustavo\Documents\GitHub\projetoIntegrador_uc13\tests\pricing.test.js:33:39
+
+      30 
+      31 // 3. Criar Produto MOCK
+      32 // Rendimento: 1
+    → 33 const prod = await prisma.product.create({
+           data: {
+             name: "Mock Bolo Matemático 1774974294714",
+             category: "BOLO",
+                       ~~~~~~
+             yield: 1
+           }
+         })
+
+    Invalid value for argument `category`. Expected Category.
+
+    [0m [90m 31 |[39m     [90m// 3. Criar Produto MOCK[39m
+     [90m 32 |[39m     [90m// Rendimento: 1[39m
+    [31m[1m>[22m[39m[90m 33 |[39m     [36mconst[39m prod [33m=[39m [36mawait[39m prisma[33m.[39mproduct[33m.[39mcreate({
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 34 |[39m       data[33m:[39m {
+     [90m 35 |[39m         name[33m:[39m [32m"Mock Bolo Matemático "[39m [33m+[39m [33mDate[39m[33m.[39mnow()[33m,[39m
+     [90m 36 |[39m         category[33m:[39m [32m"BOLO"[39m[33m,[39m[0m
+
+      at Nn (node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:45:9)
+      at ei.throwValidationException [as handleRequestError] (node_modules/@prisma/client/src/runtime/RequestHandler.ts:202:7)
+      at ei.handleAndLogRequestError (node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+      at ei.request (node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+      at a (node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+      at Object.<anonymous> (tests/pricing.test.js:33:18)
+
+  ● PricingController API Mathematical Engine › CT-PRICE-02: Deve calcular Impostos Corretamente (Repasse Direto)
+
+    PrismaClientValidationError: 
+    Invalid `prisma.product.create()` invocation in
+    C:\Users\Gustavo\Documents\GitHub\projetoIntegrador_uc13\tests\pricing.test.js:33:39
+
+      30 
+      31 // 3. Criar Produto MOCK
+      32 // Rendimento: 1
+    → 33 const prod = await prisma.product.create({
+           data: {
+             name: "Mock Bolo Matemático 1774974294714",
+             category: "BOLO",
+                       ~~~~~~
+             yield: 1
+           }
+         })
+
+    Invalid value for argument `category`. Expected Category.
+
+    [0m [90m 31 |[39m     [90m// 3. Criar Produto MOCK[39m
+     [90m 32 |[39m     [90m// Rendimento: 1[39m
+    [31m[1m>[22m[39m[90m 33 |[39m     [36mconst[39m prod [33m=[39m [36mawait[39m prisma[33m.[39mproduct[33m.[39mcreate({
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 34 |[39m       data[33m:[39m {
+     [90m 35 |[39m         name[33m:[39m [32m"Mock Bolo Matemático "[39m [33m+[39m [33mDate[39m[33m.[39mnow()[33m,[39m
+     [90m 36 |[39m         category[33m:[39m [32m"BOLO"[39m[33m,[39m[0m
+
+      at Nn (node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:45:9)
+      at ei.throwValidationException [as handleRequestError] (node_modules/@prisma/client/src/runtime/RequestHandler.ts:202:7)
+      at ei.handleAndLogRequestError (node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+      at ei.request (node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+      at a (node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+      at Object.<anonymous> (tests/pricing.test.js:33:18)
+
+  ● PricingController API Mathematical Engine › CT-PRICE-03: Deve calcular corretamente Margem Desejada Fixa
+
+    PrismaClientValidationError: 
+    Invalid `prisma.product.create()` invocation in
+    C:\Users\Gustavo\Documents\GitHub\projetoIntegrador_uc13\tests\pricing.test.js:33:39
+
+      30 
+      31 // 3. Criar Produto MOCK
+      32 // Rendimento: 1
+    → 33 const prod = await prisma.product.create({
+           data: {
+             name: "Mock Bolo Matemático 1774974294714",
+             category: "BOLO",
+                       ~~~~~~
+             yield: 1
+           }
+         })
+
+    Invalid value for argument `category`. Expected Category.
+
+    [0m [90m 31 |[39m     [90m// 3. Criar Produto MOCK[39m
+     [90m 32 |[39m     [90m// Rendimento: 1[39m
+    [31m[1m>[22m[39m[90m 33 |[39m     [36mconst[39m prod [33m=[39m [36mawait[39m prisma[33m.[39mproduct[33m.[39mcreate({
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 34 |[39m       data[33m:[39m {
+     [90m 35 |[39m         name[33m:[39m [32m"Mock Bolo Matemático "[39m [33m+[39m [33mDate[39m[33m.[39mnow()[33m,[39m
+     [90m 36 |[39m         category[33m:[39m [32m"BOLO"[39m[33m,[39m[0m
+
+      at Nn (node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:45:9)
+      at ei.throwValidationException [as handleRequestError] (node_modules/@prisma/client/src/runtime/RequestHandler.ts:202:7)
+      at ei.handleAndLogRequestError (node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+      at ei.request (node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+      at a (node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+      at Object.<anonymous> (tests/pricing.test.js:33:18)
+
+  ● PricingController API Mathematical Engine › CT-PRICE-04: O Lucro Mínimo DEVE forçar novo repasse tributário e garantir o lucro
+
+    PrismaClientValidationError: 
+    Invalid `prisma.product.create()` invocation in
+    C:\Users\Gustavo\Documents\GitHub\projetoIntegrador_uc13\tests\pricing.test.js:33:39
+
+      30 
+      31 // 3. Criar Produto MOCK
+      32 // Rendimento: 1
+    → 33 const prod = await prisma.product.create({
+           data: {
+             name: "Mock Bolo Matemático 1774974294714",
+             category: "BOLO",
+                       ~~~~~~
+             yield: 1
+           }
+         })
+
+    Invalid value for argument `category`. Expected Category.
+
+    [0m [90m 31 |[39m     [90m// 3. Criar Produto MOCK[39m
+     [90m 32 |[39m     [90m// Rendimento: 1[39m
+    [31m[1m>[22m[39m[90m 33 |[39m     [36mconst[39m prod [33m=[39m [36mawait[39m prisma[33m.[39mproduct[33m.[39mcreate({
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 34 |[39m       data[33m:[39m {
+     [90m 35 |[39m         name[33m:[39m [32m"Mock Bolo Matemático "[39m [33m+[39m [33mDate[39m[33m.[39mnow()[33m,[39m
+     [90m 36 |[39m         category[33m:[39m [32m"BOLO"[39m[33m,[39m[0m
+
+      at Nn (node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:45:9)
+      at ei.throwValidationException [as handleRequestError] (node_modules/@prisma/client/src/runtime/RequestHandler.ts:202:7)
+      at ei.handleAndLogRequestError (node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+      at ei.request (node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+      at a (node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+      at Object.<anonymous> (tests/pricing.test.js:33:18)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 4 total
+Snapshots:   0 total
+Time:        1.989 s, estimated 4 s
+Ran all test suites matching tests/pricing.test.js.

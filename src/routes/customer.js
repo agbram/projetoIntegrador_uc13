@@ -46,7 +46,7 @@ const router = Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.store);
+router.post('/', verificaRule(["ADM", "ATENDENTE", "ATENDENTES"]), CustomerController.store);
 
 /**
  * @swagger
@@ -58,7 +58,7 @@ router.post('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.store);
  *       200:
  *         description: Lista de clientes
  */
-router.get('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.index);
+router.get('/', verificaRule(["ADM", "ATENDENTE", "ATENDENTES"]), CustomerController.index);
 
 /**
  * @swagger
@@ -101,7 +101,7 @@ router.get('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.index);
  *       404:
  *         description: Cliente não encontrado
  */
-router.put('/:id', verificaRule(["ADM", "ATENDENTE"]), CustomerController.put);
+router.put('/:id', verificaRule(["ADM", "ATENDENTE", "ATENDENTES"]), CustomerController.put);
 
 /**
  * @swagger

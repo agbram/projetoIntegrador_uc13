@@ -14,7 +14,7 @@ export function verificaRule(requiredRole) {
       const vinculo = await prisma.ruleGroup.findFirst({
         where: {
           rule: { name: { in: need } },
-          group: { users: { some: { id: userId } } },
+          group: { users: { some: { userId: userId } } },
         },
         select: { id: true },
       });

@@ -481,11 +481,7 @@ async atualizaStatus(req, res, next) {
         return res.status(404).json({ error: "Produto não encontrado" });
       }
 
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          error: `Estoque insuficiente. Disponível: ${product.stockQuantity} unidades.`,
-        });
-      }
+
 
       const unitPrice = product.salePrice;
       const subtotal = quantity * unitPrice;
@@ -510,14 +506,25 @@ async atualizaStatus(req, res, next) {
         },
       });
 
-      const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+      const newSubtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+      const order = await prisma.order.findUnique({
+        where: { id: Number(orderId) },
+        select: { discount: true }
+      });
+
+      let total = newSubtotal - (order.discount || 0);
+      total = Math.max(total, 0);
 
       await prisma.order.update({
         where: { id: Number(orderId) },
-        data: { total: parseFloat(newTotal.toFixed(2)) },
+        data: { 
+          subtotal: parseFloat(newSubtotal.toFixed(2)),
+          total: parseFloat(total.toFixed(2)) 
+        },
       });
 
-      res.status(201).json({ item, newTotal });
+      res.status(201).json({ item, newTotal: total, newSubtotal });
     } catch (error) {
       console.error("Erro ao adicionar item!", error);
       next(error);
@@ -539,14 +546,25 @@ async atualizaStatus(req, res, next) {
         },
       });
 
-      const newTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+      const newSubtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+      const order = await prisma.order.findUnique({
+        where: { id: Number(orderId) },
+        select: { discount: true }
+      });
+
+      let total = newSubtotal - (order.discount || 0);
+      total = Math.max(total, 0);
 
       await prisma.order.update({
         where: { id: Number(orderId) },
-        data: { total: newTotal },
+        data: { 
+          subtotal: parseFloat(newSubtotal.toFixed(2)),
+          total: parseFloat(total.toFixed(2)) 
+        },
       });
 
-      res.status(200).json({ deletedItem: item, newTotal });
+      res.status(200).json({ deletedItem: item, newTotal: total, newSubtotal });
     } catch (error) {
       console.error("Erro ao excluir item!", error);
       next(error);
@@ -578,11 +596,7 @@ async atualizaStatus(req, res, next) {
         return res.status(404).json({ error: "Produto não encontrado." });
       }
 
-      if (quantity > product.stockQuantity) {
-        return res.status(400).json({
-          error: `Estoque insuficiente. Disponível: ${product.stockQuantity} unidades.`,
-        });
-      }
+
 
       const existingItem = await prisma.orderItem.findUnique({
         where: { id: Number(itemId) },
@@ -614,9 +628,33 @@ async atualizaStatus(req, res, next) {
         },
       });
 
+      const items = await prisma.orderItem.findMany({
+        where: { orderId: Number(orderId) }
+      });
+
+      const newSubtotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+      const order = await prisma.order.findUnique({
+        where: { id: Number(orderId) },
+        select: { discount: true }
+      });
+
+      let total = newSubtotal - (order.discount || 0);
+      total = Math.max(total, 0);
+
+      await prisma.order.update({
+        where: { id: Number(orderId) },
+        data: { 
+          subtotal: parseFloat(newSubtotal.toFixed(2)),
+          total: parseFloat(total.toFixed(2)) 
+        },
+      });
+
       res.status(200).json({
         message: "Item atualizado com sucesso!",
         item: updatedItem,
+        newTotal: total,
+        newSubtotal
       });
     } catch (error) {
       console.error("Erro ao atualizar item do pedido:", error);

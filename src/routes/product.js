@@ -52,7 +52,7 @@ router.post('/', verificaRule(["ADM"]), ProductController.store);
  *       200:
  *         description: Lista de produtos
  */
-router.get('/', verificaRule(["ADM", "ATENDENTE"]), ProductController.index);
+router.get('/', verificaRule(["ADM", "ATENDENTE", "ATENDENTES"]), ProductController.index);
 
 /**
  * @swagger
@@ -73,7 +73,7 @@ router.get('/', verificaRule(["ADM", "ATENDENTE"]), ProductController.index);
  *       404:
  *         description: Produto não encontrado
  */
-router.get('/:id', verificaRule(["ADM", "ATENDENTE"]), ProductController.show);
+router.get('/:id', verificaRule(["ADM", "ATENDENTE", "ATENDENTES"]), ProductController.show);
 
 /**
  * @swagger

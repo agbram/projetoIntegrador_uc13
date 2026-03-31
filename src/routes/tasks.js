@@ -5,41 +5,41 @@ import { verificaRule } from '../middlewares/rules.js';
 const router = express.Router();
 
 // Dashboard de produção
-router.get('/dashboard', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.dashboard);
+router.get('/dashboard', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.dashboard);
 
 // Listar tarefas
-router.get('/', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.index);
+router.get('/', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.index);
 
 // Sincronizar todos os pedidos
-router.post('/sync-all-orders', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.syncAllOrdersClean);
+router.post('/sync-all-orders', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.syncAllOrdersClean);
 
 // Atualizar progresso
-router.patch('/:id/progress', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.updateProgress);
+router.patch('/:id/progress', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.updateProgress);
 
 // Atualizar status
-router.patch('/:id/status', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.updateStatus);
+router.patch('/:id/status', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.updateStatus);
 
 // Atualizar tarefa
-router.put('/:id', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.put);
+router.put('/:id', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.put);
 
 // Deletar tarefa
-router.delete('/:id', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.delete);
+router.delete('/:id', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.delete);
 
 // Limpar concluídas
-router.delete('/', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.clearCompleted);
+router.delete('/', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.clearCompleted);
 
-router.delete('/order/:orderId', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.forceRemoveOrderFromProduction);
+router.delete('/order/:orderId', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.forceRemoveOrderFromProduction);
 
 // Nas rotas de tasks, adicione:
-router.post('/:orderId/remove-from-production', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.removeOrderFromProduction);
+router.post('/:orderId/remove-from-production', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.removeOrderFromProduction);
 
 // Sincronização inteligente (RECOMENDADA)
-router.post('/sync-new-orders', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.syncNewOrdersOnly);
+router.post('/sync-new-orders', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.syncNewOrdersOnly);
 
 //  Status de sincronização
-router.get('/sync-status', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.getSyncStatus);
+router.get('/sync-status', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.getSyncStatus);
 
 //  Sincronização completa (APENAS PARA CASOS ESPECÍFICOS)
-router.post('/sync-all-orders-clean', verificaRule(["ADM", "CONFEITEIRA"]), TaskController.syncAllOrdersClean);
+router.post('/sync-all-orders-clean', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.syncAllOrdersClean);
 
 export default router;

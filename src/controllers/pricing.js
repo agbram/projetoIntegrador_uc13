@@ -662,7 +662,12 @@ async simulatePrice(req, res, next) {
       let minProfitApplied = false;
       if (profit < minProfitValue) {
         profit = minProfitValue;
-        salePrice = costWithExpenses + minProfitValue + taxAmount;
+        
+        // CORREÇÃO DA SONEGAÇÃO MATEMÁTICA: Recalcular base de impostos usando o novo Preço-Base Subido.
+        const priceBeforeTax = costWithExpenses + profit;
+        const newTaxAmount = priceBeforeTax * (taxValue / 100);
+        salePrice = priceBeforeTax + newTaxAmount;
+        
         minProfitApplied = true;
         // Recalcular markup e margem com novo preço
         profitMargin = (profit / salePrice) * 100;
