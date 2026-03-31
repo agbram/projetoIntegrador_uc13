@@ -1,6 +1,19 @@
+import { jest, describe, expect, it } from "@jest/globals";
 import request from "supertest";
-import { describe, expect, it } from "@jest/globals";
-import { app } from "../src/api.js";
+
+jest.unstable_mockModule("../src/middlewares/auth.js", () => ({
+  verificaToken: (req, res, next) => {
+    
+    req.usuario = { id: 1, email: "admin@teste.com", name: "Admin Teste" };
+    next();
+  },
+}));
+
+jest.unstable_mockModule("../src/middlewares/rules.js", () => ({
+  verificaRule: () => (req, res, next) => next(),
+}));
+
+const { app } = await import("../src/api.js");
 
 describe("FixedExpenses API", () => {
   it("CT-FE-01: Deve criar uma despesa fixa válida", async () => {
@@ -69,6 +82,7 @@ describe("FixedExpenses API", () => {
 
   it("CT-FE-06: Deve listar todas as despesas fixas", async () => {
     const response = await request(app).get("/fixedexpenses");
+
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
   });
