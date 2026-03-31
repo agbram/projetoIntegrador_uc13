@@ -1,5 +1,6 @@
 import express from 'express';
 import { ProductController } from '../controllers/product.js';
+import { verificaRule } from '../middlewares/rules.js';
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ const router = express.Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post('/', ProductController.store);
+router.post('/', verificaRule(["ADM"]), ProductController.store);
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ router.post('/', ProductController.store);
  *       200:
  *         description: Lista de produtos
  */
-router.get('/', ProductController.index);
+router.get('/', verificaRule(["ADM", "ATENDENTE"]), ProductController.index);
 
 /**
  * @swagger
@@ -72,7 +73,7 @@ router.get('/', ProductController.index);
  *       404:
  *         description: Produto não encontrado
  */
-router.get('/:id', ProductController.show);
+router.get('/:id', verificaRule(["ADM", "ATENDENTE"]), ProductController.show);
 
 /**
  * @swagger
@@ -105,7 +106,7 @@ router.get('/:id', ProductController.show);
  *       404:
  *         description: Produto não encontrado
  */
-router.put('/:id', ProductController.update);
+router.put('/:id', verificaRule(["ADM"]), ProductController.update);
 
 /**
  * @swagger
@@ -125,6 +126,6 @@ router.put('/:id', ProductController.update);
  *       404:
  *         description: produtos não encontrado
  */
-router.delete("/:id", ProductController.del);
+router.delete("/:id", verificaRule(["ADM"]), ProductController.del);
 
 export default router;

@@ -122,10 +122,15 @@ async login(req, res, next) {
         return res.status(403).json({ error: "Não é permitido deletar o administrador." });
       }
 
+      // Remove associações antes de deletar
+      await prisma.groupUser.deleteMany({ where: { userId: id } });
+      await prisma.order.updateMany({ where: { userId: id }, data: { userId: null } });
+
       const u = await prisma.user.delete({ where: { id } });
       res.status(200).json(u);
     } catch (err) {
-      res.status(404).json({ error: "Id não encontrado!" });
+      console.error("Erro ao deletar:", err);
+      res.status(500).json({ error: "Erro ao remover usuário." });
     }
   },
 

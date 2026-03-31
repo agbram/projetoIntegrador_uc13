@@ -1,5 +1,6 @@
 import express from 'express';
 import { SupplyPurchaseController } from '../controllers/supplyPurchase.js';
+import { verificaRule } from '../middlewares/rules.js';
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ const router = express.Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post('/', SupplyPurchaseController.store);
+router.post('/', verificaRule(["ADM"]), SupplyPurchaseController.store);
 
 /**
  * @swagger
@@ -49,7 +50,7 @@ router.post('/', SupplyPurchaseController.store);
  *       200:
  *         description: Lista de compras
  */
-router.get('/', SupplyPurchaseController.index);
+router.get('/', verificaRule(["ADM"]), SupplyPurchaseController.index);
 
 /**
  * @swagger
@@ -70,7 +71,7 @@ router.get('/', SupplyPurchaseController.index);
  *       404:
  *         description: Compra não encontrada
  */
-router.get('/:id', SupplyPurchaseController.show);
+router.get('/:id', verificaRule(["ADM"]), SupplyPurchaseController.show);
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ router.get('/:id', SupplyPurchaseController.show);
  *       404:
  *         description: Compra não encontrada
  */
-router.put('/:id', SupplyPurchaseController.update);
+router.put('/:id', verificaRule(["ADM"]), SupplyPurchaseController.update);
 
 /**
  * @swagger
@@ -122,7 +123,7 @@ router.put('/:id', SupplyPurchaseController.update);
  *       404:
  *         description: Compra não encontrada
  */
-router.delete('/:id', SupplyPurchaseController.delete);
+router.delete('/:id', verificaRule(["ADM"]), SupplyPurchaseController.delete);
 
 /**
  * @swagger
@@ -157,6 +158,6 @@ router.delete('/:id', SupplyPurchaseController.delete);
  *       404:
  *         description: Compra ou item não encontrado
  */
-router.post('/:supplyPurchaseId/items', SupplyPurchaseController.addItem);
+router.post('/:supplyPurchaseId/items', verificaRule(["ADM"]), SupplyPurchaseController.addItem);
 
 export default router;

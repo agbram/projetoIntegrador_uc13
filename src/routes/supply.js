@@ -1,5 +1,6 @@
 import express from 'express';
 import { SupplyController } from '../controllers/supply.js';
+import { verificaRule } from '../middlewares/rules.js';
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ const router = express.Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post("/", SupplyController.store);
+router.post("/", verificaRule(["ADM"]), SupplyController.store);
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ router.post("/", SupplyController.store);
  *       200:
  *         description: Lista de suprimentos
  */
-router.get("/", SupplyController.index);
+router.get("/", verificaRule(["ADM"]), SupplyController.index);
 
 /**
  * @swagger
@@ -72,7 +73,7 @@ router.get("/", SupplyController.index);
  *       404:
  *         description: Suprimento não encontrado
  */
-router.get("/:id", SupplyController.show);
+router.get("/:id", verificaRule(["ADM"]), SupplyController.show);
 
 /**
  * @swagger
@@ -105,7 +106,7 @@ router.get("/:id", SupplyController.show);
  *       404:
  *         description: Suprimento não encontrado
  */
-router.put("/:id", SupplyController.put);
+router.put("/:id", verificaRule(["ADM"]), SupplyController.put);
 
 /**
  * @swagger
@@ -125,6 +126,6 @@ router.put("/:id", SupplyController.put);
  *       404:
  *         description: Suprimento não encontrado
  */
-router.delete("/:id", SupplyController.del);
+router.delete("/:id", verificaRule(["ADM"]), SupplyController.del);
 
 export default router;

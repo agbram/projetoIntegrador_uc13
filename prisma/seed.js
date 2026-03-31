@@ -77,13 +77,13 @@ async function main() {
   // Crie um nome para a unique composta no schema para permitir upsert,
   // ex: @@unique([groupId, ruleId], name: "group_rule_unique")
   
-  const passHash = await bcrypt.hash("Adm@123", 10);
+  const passHash = await bcrypt.hash(process.env.admin_pass, 10);
   
   const user = await prisma.user.create({
 
     data: {
-      name: "adm",
-      email: "adm@gmail.com",
+      name: "Adminstrador",
+      email: process.env.admin_user,
       password: passHash,
       phone: "16992455837"
     }

@@ -38,7 +38,7 @@ const router = express.Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post('/', verificaRule("ADM"), OrderController.store);
+router.post('/', verificaRule(["ADM", "ATENDENTE"]), OrderController.store);
 
 /**
  * @swagger
@@ -50,7 +50,7 @@ router.post('/', verificaRule("ADM"), OrderController.store);
  *       200:
  *         description: Lista de pedidos
  */
-router.get('/', OrderController.index);
+router.get('/', verificaRule(["ADM", "ATENDENTE"]), OrderController.index);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.get('/', OrderController.index);
  *       404:
  *         description: Pedido não encontrado
  */
-router.get('/:id', OrderController.show);
+router.get('/:id', verificaRule(["ADM", "ATENDENTE"]), OrderController.show);
 
 /**
  * @swagger
@@ -103,7 +103,7 @@ router.get('/:id', OrderController.show);
  *       404:
  *         description: Pedido não encontrado
  */
-router.put('/:id', OrderController.update);
+router.put('/:id', verificaRule(["ADM", "ATENDENTE"]), OrderController.update);
 
 /**
  * @swagger
@@ -138,7 +138,7 @@ router.put('/:id', OrderController.update);
  *       404:
  *         description: Pedido ou produto não encontrado
  */
-router.post("/:orderId/items", OrderController.addItem);
+router.post("/:orderId/items", verificaRule(["ADM", "ATENDENTE"]), OrderController.addItem);
 
 /**
  * @swagger
@@ -163,7 +163,7 @@ router.post("/:orderId/items", OrderController.addItem);
  *       404:
  *         description: Pedido ou item não encontrado
  */
-router.delete("/:orderId/items/:itemId", OrderController.delItem);
+router.delete("/:orderId/items/:itemId", verificaRule(["ADM", "ATENDENTE"]), OrderController.delItem);
 
 /**
  * @swagger
@@ -199,7 +199,7 @@ router.delete("/:orderId/items/:itemId", OrderController.delItem);
  *       404:
  *         description: Pedido ou item não encontrado
  */
-router.put("/:orderId/items/:itemId", OrderController.updateItem);
+router.put("/:orderId/items/:itemId", verificaRule(["ADM", "ATENDENTE"]), OrderController.updateItem);
 
 /**
  * @swagger
@@ -231,7 +231,7 @@ router.put("/:orderId/items/:itemId", OrderController.updateItem);
  *       404:
  *         description: Pedido não encontrado
  */
-router.put("/atualiza-status/:id", OrderController.atualizaStatus);
-router.post('/check-production-status', OrderController.checkAllOrdersProductionStatus);
+router.put("/atualiza-status/:id", verificaRule(["ADM", "CONFEITEIRA"]), OrderController.atualizaStatus);
+router.post('/check-production-status', verificaRule(["ADM", "CONFEITEIRA"]), OrderController.checkAllOrdersProductionStatus);
 
 export default router;

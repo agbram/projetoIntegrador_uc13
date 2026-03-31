@@ -20,7 +20,6 @@ import pricingRoutes from "./routes/pricing.js";
 
 // Middlewares
 import { verificaToken } from "./middlewares/auth.js";
-import { verificaRule } from "./middlewares/rules.js";
 
 // __dirname fix (ESM)
 const __filename = fileURLToPath(import.meta.url);
@@ -99,16 +98,15 @@ const swaggerSpecs = swaggerJSDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Rotas
-app.use("/users", verificaToken, userRoutes);
+app.use("/users", userRoutes); // NÃO aplica verificaToken aqui — cada rota individual já tem seu próprio middleware
 app.use("/orders", verificaToken, orderRoutes);
 app.use("/products", verificaToken, productRoutes);
 app.use(
   "/fixedExpenses",
   verificaToken,
-  verificaRule("ADM"),
   fixedExpenseRoutes
 );
-app.use("/customers",verificaToken, verificaRule("ADM"),
+app.use("/customers",verificaToken,
   customerRoutes
 );
 app.use("/supply", verificaToken, supplyRoutes);

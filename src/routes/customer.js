@@ -46,7 +46,7 @@ const router = Router();
  *       400:
  *         description: Requisição inválida
  */
-router.post('/', verificaRule("ADM"), CustomerController.store);
+router.post('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.store);
 
 /**
  * @swagger
@@ -58,7 +58,7 @@ router.post('/', verificaRule("ADM"), CustomerController.store);
  *       200:
  *         description: Lista de clientes
  */
-router.get('/', verificaRule("ADM"), CustomerController.index);
+router.get('/', verificaRule(["ADM", "ATENDENTE"]), CustomerController.index);
 
 /**
  * @swagger
@@ -101,7 +101,7 @@ router.get('/', verificaRule("ADM"), CustomerController.index);
  *       404:
  *         description: Cliente não encontrado
  */
-router.put('/:id', verificaRule("ADM"), CustomerController.put);
+router.put('/:id', verificaRule(["ADM", "ATENDENTE"]), CustomerController.put);
 
 /**
  * @swagger
@@ -121,8 +121,8 @@ router.put('/:id', verificaRule("ADM"), CustomerController.put);
  *       404:
  *         description: Cliente não encontrado
  */
-router.delete('/:id', verificaRule("ADM"), CustomerController.delete);
-router.get('/check-document/:document', verificaRule("ADM"), CustomerController.show);
-router.get('/search', CustomerController.search);
+router.delete('/:id', verificaRule(["ADM", "ATENDENTE"]), CustomerController.delete);
+router.get('/check-document/:document', verificaRule(["ADM", "ATENDENTE"]), CustomerController.show);
+router.get('/search', verificaRule(["ADM", "ATENDENTE"]), CustomerController.search);
 
 export default router;
