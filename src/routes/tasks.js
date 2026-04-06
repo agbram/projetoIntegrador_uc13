@@ -11,7 +11,7 @@ router.get('/dashboard', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), T
 router.get('/', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.index);
 
 // Sincronizar todos os pedidos
-router.post('/sync-all-orders', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.syncAllOrdersClean);
+router.post('/sync-all-orders', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.syncAllOrders);
 
 // Atualizar progresso
 router.patch('/:id/progress', verificaRule(["ADM", "CONFEITEIRA", "CONFEITEIRAS"]), TaskController.updateProgress);

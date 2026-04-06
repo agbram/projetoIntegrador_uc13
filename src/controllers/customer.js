@@ -7,6 +7,10 @@ export const CustomerController = {
       const { name, document, type, contact, email, address, note, modality } =
         req.body;
 
+      if (!name || !document) {
+        return res.status(400).json({ error: "Nome e Documento/CNPJ são obrigatórios." });
+      }
+
       const existingCustomer = await prisma.customer.findFirst({
         where: {
           OR: [{ document: document }, { email: email }],

@@ -22,7 +22,7 @@
 
       console.log("=== DEBUG IMAGEM STORE ===");
       console.log("Recebeu fotoData?", !!fotoData);
-      if (fotoData) {
+      if (fotoData && typeof fotoData === 'string') {
         console.log("Tamanho:", fotoData.length);
         console.log("Primeiros 50 chars:", fotoData.substring(0, 50));
       }

@@ -326,7 +326,7 @@ const TaskController = {
         const allQuantities = allTasks.map(task => task.pendingQuantity);
         
         for (const task of allTasks) {
-          const priority = TaskController.calculatePriority(task.pendingQuantity, allQuantities);
+          const priority = TaskController.calculatePriority(task.pendingQuantity, allQuantities, task.dueDate);
 
           await tx.productionTask.update({
             where: { id: task.id },
@@ -343,21 +343,58 @@ const TaskController = {
     }
   },
 
-  // Calcular prioridade baseada em quantidade
-  calculatePriority(quantity, allQuantities) {
-    if (allQuantities.length === 0) return 'MEDIUM';
+  // Calcular prioridade baseada em Data (Maior peso) e Quantidade (Menor peso)
+  calculatePriority(quantity, allQuantities, dueDate) {
+    let volumePoints = 0;
     
-    const maxQuantity = Math.max(...allQuantities);
-    const minQuantity = Math.min(...allQuantities);
-    const range = maxQuantity - minQuantity;
+    // 1. Cálculo do Volume estritamente matemático (0 a 5 pontos base na fila toda)
+    if (allQuantities.length > 0) {
+      const maxQuantity = Math.max(...allQuantities);
+      const minQuantity = Math.min(...allQuantities);
+      const range = maxQuantity - minQuantity;
+      
+      if (range > 0) {
+        const position = (quantity - minQuantity) / range;
+        volumePoints = position * 5; // Escala máxima em 5 para o maior
+      } else {
+        volumePoints = 2.5; // Todos iguais
+      }
+    }
+
+    // 2. Cálculo da Data de Entrega (0 a 10 pontos de peso)
+    let datePoints = 0;
+    if (dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const targetDate = new Date(dueDate);
+      targetDate.setHours(0, 0, 0, 0);
+
+      const diffTime = targetDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 1) { // Atrasado ou p/ Hoje
+        datePoints = 10;
+      } else if (diffDays === 2) { // Amanhã
+        datePoints = 8;
+      } else if (diffDays <= 4) { // Próximos 4 dias
+        datePoints = 5;
+      } else if (diffDays <= 7) { // Em uma semana
+        datePoints = 2;
+      } else { // Distante
+        datePoints = 0;
+      }
+    } else {
+      datePoints = 4; // Se faltar data no banco assume um risco intermediário
+    }
+
+    // 3. Cruzamento Total de Gravidade (0 a 15 pontos)
+    const totalPoints = datePoints + volumePoints;
+
+    if (totalPoints >= 10) return 'URGENT';
+    if (totalPoints >= 6) return 'HIGH';
+    if (totalPoints >= 3) return 'MEDIUM';
     
-    if (range === 0) return 'MEDIUM';
-    
-    const position = (quantity - minQuantity) / range;
-    
-    if (position >= 0.8) return 'URGENT';
-    if (position >= 0.5) return 'HIGH';
-    if (position >= 0.2) return 'MEDIUM';
     return 'LOW';
   },
 

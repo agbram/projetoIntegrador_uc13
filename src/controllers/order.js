@@ -12,6 +12,12 @@ async store(req, res, next) {
       });
     }
 
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        error: "O pedido deve conter pelo menos um item em formato de lista.",
+      });
+    }
+
     const itemsComCalculo = await Promise.all(
       items.map(async (item) => {
         const product = await prisma.product.findUnique({
