@@ -4,6 +4,9 @@ import { verificaRule } from '../middlewares/rules.js';
 
 const router = Router();
 
+// Rota de administração / automação (PRECISA vir antes do /:id)
+router.post("/generate-month", verificaRule(["ADM"]), FixedExpenseController.generateMonth);
+
 router.post("/", verificaRule(["ADM"]), FixedExpenseController.store);
 router.get("/", verificaRule(["ADM"]), FixedExpenseController.index);
 router.get("/:id", verificaRule(["ADM"]), FixedExpenseController.show);

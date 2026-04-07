@@ -1,4 +1,5 @@
 import prisma from "../prisma.js";
+import { generateMonthlyExpenses } from "../services/expenseGenerator.js";
 
 export const FixedExpenseController = {
   // Criar uma nova despesa fixa
@@ -314,6 +315,22 @@ async comparison(req, res, next) {
       },
       variation,
       trend: variation > 0 ? 'up' : variation < 0 ? 'down' : 'stable'
+    });
+  } catch (err) {
+    next(err);
+  }
+},
+
+// Forçar a geração das contas fixas pontualmente
+async generateMonth(req, res, next) {
+  try {
+    const { year, month } = req.body; // Puxar do front caso tenham
+    const result = await generateMonthlyExpenses(year, month);
+    res.status(result.count > 0 ? 201 : 200).json({
+      message: result.count > 0 
+        ? `Geração concluída com sucesso. Foram projetadas ${result.count} contas para o mês atual.`
+        : "Nenhuma nova despesa precisou ser gerada neste mês.",
+      createdCount: result.count
     });
   } catch (err) {
     next(err);

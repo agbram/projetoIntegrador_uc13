@@ -18,7 +18,6 @@ import supplyRoutes from "./routes/supply.js";
 import supplyPurchaseRoutes from "./routes/supplyPurchase.js";
 import pricingRoutes from "./routes/pricing.js";
 
-// Middlewares
 import { verificaToken } from "./middlewares/auth.js";
 
 // __dirname fix (ESM)
