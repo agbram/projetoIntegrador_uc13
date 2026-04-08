@@ -53,6 +53,7 @@ async function main() {
   const rulesData = [
     { name: 'ADM',   description: 'Acesso total ao sistema'},
     { name: 'CONFEITEIRAS',  description: 'Pode editar a quantidade de produtos no estoque / acesso parcial' },
+    { name: 'ATENDENTE', description: 'Atendimento ao cliente e registro de pedidos' },
   ];
 
   const rules = {};
@@ -65,6 +66,7 @@ async function main() {
   const groupsData = [
     { name: 'Administrador', description: 'Administrador' },
     { name: 'Confeiteiras', description: 'Funcionário com acesso parcial' },
+    { name: 'Atendentes', description: 'Atendimento ao cliente' },
   ];
 
   const groups = {};
@@ -94,6 +96,7 @@ async function main() {
 
 await connectRuleToGroup({ groupId: groups['Administrador'].id,        ruleId: rules.ADM.id });
 await connectRuleToGroup({ groupId: groups['Confeiteiras'].id,        ruleId: rules.CONFEITEIRAS.id });
+await connectRuleToGroup({ groupId: groups['Atendentes'].id,           ruleId: rules.ATENDENTE.id });
 
 
 // 4) (Opcional) Vincula Users a Groups
